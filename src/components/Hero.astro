@@ -1,0 +1,146 @@
+---
+---
+<section id="hero">
+  <div class="hero-bg"></div>
+  <canvas id="particles-canvas"></canvas>
+  <div class="hero-content">
+    <p class="label hero-label">↓ scroll to explore</p>
+    <h1 class="hero-name" aria-label="Maurizio">
+      {'Maurizio'.split('').map((c) => <span class="char" data-char={c}>{c}</span>)}
+    </h1>
+    <p class="hero-sub">
+      Music · Photography · Travel · Code
+    </p>
+    <div class="scroll-indicator" aria-hidden="true">
+      <svg width="24" height="40" viewBox="0 0 24 40" fill="none">
+        <rect x="1" y="1" width="22" height="38" rx="11" stroke="var(--border)" stroke-width="1.5"/>
+        <rect class="scroll-dot" x="10" y="6" width="4" height="8" rx="2" fill="var(--primary)"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<style>
+  #hero {
+    position: relative;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 0;
+  }
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 60% 50% at 50% 0%, color-mix(in srgb, var(--primary) 8%, transparent), transparent 70%);
+    pointer-events: none;
+  }
+  #particles-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+  .hero-content {
+    position: relative;
+    text-align: center;
+    z-index: 1;
+  }
+  .hero-label {
+    margin-bottom: 1.5rem;
+    opacity: 0;
+  }
+  .hero-name {
+    font-size: clamp(4rem, 12vw, 10rem);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    color: var(--text);
+    line-height: 1;
+    margin-bottom: 1.5rem;
+  }
+  .char {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(-60px);
+  }
+  .hero-sub {
+    font-family: var(--font-mono);
+    font-size: clamp(0.875rem, 2vw, 1rem);
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    opacity: 0;
+  }
+  .scroll-indicator {
+    margin-top: 3rem;
+    display: flex;
+    justify-content: center;
+    opacity: 0;
+  }
+  .scroll-dot {
+    animation: scrollDown 1.8s ease infinite;
+  }
+  @keyframes scrollDown {
+    0%   { transform: translateY(0); opacity: 1; }
+    80%  { transform: translateY(16px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 0; }
+  }
+</style>
+
+<script>
+  import gsap from 'gsap';
+
+  const chars = document.querySelectorAll<HTMLElement>('.char');
+  const label = document.querySelector<HTMLElement>('.hero-label');
+  const sub = document.querySelector<HTMLElement>('.hero-sub');
+  const scrollInd = document.querySelector<HTMLElement>('.scroll-indicator');
+
+  const tl = gsap.timeline({ delay: 0.3 });
+  tl.to(label, { opacity: 1, duration: 0.6, ease: 'power2.out' })
+    .to(chars, {
+      opacity: 1,
+      y: 0,
+      duration: 0.7,
+      stagger: 0.055,
+      ease: 'power3.out',
+    }, '-=0.2')
+    .to(sub, { opacity: 1, duration: 0.6, ease: 'power2.out' }, '-=0.3')
+    .to(scrollInd, { opacity: 1, duration: 0.6, ease: 'power2.out' }, '-=0.2');
+
+  // Particelle leggere
+  const canvas = document.getElementById('particles-canvas') as HTMLCanvasElement;
+  const ctx = canvas.getContext('2d')!;
+  let W = canvas.width = canvas.offsetWidth;
+  let H = canvas.height = canvas.offsetHeight;
+
+  const particles = Array.from({ length: 40 }, () => ({
+    x: Math.random() * W,
+    y: Math.random() * H,
+    r: Math.random() * 1.5 + 0.5,
+    dx: (Math.random() - 0.5) * 0.3,
+    dy: (Math.random() - 0.5) * 0.3,
+    o: Math.random() * 0.4 + 0.1,
+  }));
+
+  function drawParticles() {
+    ctx.clearRect(0, 0, W, H);
+    particles.forEach((p) => {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(79,142,247,${p.o})`;
+      ctx.fill();
+      p.x += p.dx;
+      p.y += p.dy;
+      if (p.x < 0 || p.x > W) p.dx *= -1;
+      if (p.y < 0 || p.y > H) p.dy *= -1;
+    });
+    requestAnimationFrame(drawParticles);
+  }
+  drawParticles();
+
+  window.addEventListener('resize', () => {
+    W = canvas.width = canvas.offsetWidth;
+    H = canvas.height = canvas.offsetHeight;
+  });
+</script>

@@ -1,0 +1,69 @@
+---
+---
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+
+<style>
+  #cursor-dot,
+  #cursor-ring {
+    position: fixed;
+    top: 0;
+    left: 0;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 10000;
+    transform: translate(-50%, -50%);
+    transition: opacity 0.3s;
+  }
+  #cursor-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--text);
+  }
+  #cursor-ring {
+    width: 36px;
+    height: 36px;
+    border: 1.5px solid color-mix(in srgb, var(--primary) 60%, transparent);
+    mix-blend-mode: difference;
+  }
+  body:not(.cursor-ready) #cursor-dot,
+  body:not(.cursor-ready) #cursor-ring {
+    opacity: 0;
+  }
+</style>
+
+<script>
+  const dot = document.getElementById('cursor-dot')!;
+  const ring = document.getElementById('cursor-ring')!;
+  let mx = 0, my = 0, rx = 0, ry = 0;
+
+  document.addEventListener('mousemove', (e) => {
+    mx = e.clientX;
+    my = e.clientY;
+    document.body.classList.add('cursor-ready');
+    dot.style.left = mx + 'px';
+    dot.style.top = my + 'px';
+  });
+
+  function lerp(a: number, b: number, t: number) { return a + (b - a) * t; }
+
+  function tick() {
+    rx = lerp(rx, mx, 0.12);
+    ry = lerp(ry, my, 0.12);
+    ring.style.left = rx + 'px';
+    ring.style.top = ry + 'px';
+    requestAnimationFrame(tick);
+  }
+  tick();
+
+  document.querySelectorAll('a, button, [data-magnetic]').forEach((el) => {
+    el.addEventListener('mouseenter', () => {
+      ring.style.transform = 'translate(-50%, -50%) scale(1.6)';
+      ring.style.borderColor = 'var(--accent)';
+    });
+    el.addEventListener('mouseleave', () => {
+      ring.style.transform = 'translate(-50%, -50%) scale(1)';
+      ring.style.borderColor = '';
+    });
+  });
+</script>

@@ -1,0 +1,81 @@
+---
+---
+<nav id="main-nav">
+  <div class="nav-inner">
+    <a href="#hero" class="nav-logo">Maurizio</a>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#creative">Creative</a></li>
+      <li><a href="#courses">Courses</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </div>
+</nav>
+
+<style>
+  #main-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    padding: 1rem 0;
+    transform: translateY(-100%);
+    opacity: 0;
+    transition: transform 0.4s ease, opacity 0.4s ease;
+    background: color-mix(in srgb, var(--bg) 80%, transparent);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+  }
+  #main-nav.visible {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  .nav-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .nav-logo {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+  .nav-links {
+    display: flex;
+    list-style: none;
+    gap: 2rem;
+  }
+  .nav-links a {
+    font-size: 0.875rem;
+    color: var(--muted);
+    transition: color 0.2s;
+    font-family: var(--font-mono);
+  }
+  .nav-links a:hover { color: var(--text); }
+
+  @media (max-width: 640px) {
+    .nav-links { display: none; }
+  }
+</style>
+
+<script>
+  const nav = document.getElementById('main-nav')!;
+  let lastScroll = 0;
+
+  window.addEventListener('scroll', () => {
+    const current = window.scrollY;
+    if (current > 100 && current < lastScroll) {
+      nav.classList.add('visible');
+    } else {
+      nav.classList.remove('visible');
+    }
+    lastScroll = current;
+  });
+</script>

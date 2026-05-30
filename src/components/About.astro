@@ -1,0 +1,128 @@
+---
+const counters = [
+  { value: 10, label: 'years of experience', suffix: '+' },
+  { value: 20, label: 'github projects', suffix: '+' },
+  { value: 15, label: 'countries visited', suffix: '' },
+];
+---
+<section id="about">
+  <div class="container">
+    <p class="label reveal">// about</p>
+    <div class="about-grid">
+      <div class="avatar-wrap reveal">
+        <div class="avatar-placeholder">M</div>
+      </div>
+      <div class="about-text">
+        <h2 class="reveal">Curious by nature,<br/>creative by choice.</h2>
+        <p class="bio reveal">
+          I'm Maurizio — I spend my days working with complex systems and my free time
+          making music with AI, photographing the world, writing code for fun, and
+          exploring new places. This is my corner of the internet.
+        </p>
+        <div class="counters">
+          {counters.map((c) => (
+            <div class="counter reveal">
+              <span class="counter-value" data-target={c.value}>{c.value}</span><span class="counter-suffix">{c.suffix}</span>
+              <span class="counter-label">{c.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  #about { border-top: 1px solid var(--border); }
+  .label { margin-bottom: 3rem; }
+  .about-grid {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 4rem;
+    align-items: start;
+  }
+  .avatar-wrap { display: flex; justify-content: center; }
+  .avatar-placeholder {
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-heading);
+    font-size: 5rem;
+    font-weight: 700;
+    color: var(--primary);
+    box-shadow: 0 0 40px color-mix(in srgb, var(--primary) 15%, transparent);
+  }
+  h2 {
+    font-size: clamp(2rem, 4vw, 2.8rem);
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: var(--text);
+  }
+  .bio {
+    color: var(--muted);
+    font-size: 1.05rem;
+    line-height: 1.8;
+    margin-bottom: 3rem;
+    max-width: 540px;
+  }
+  .counters {
+    display: flex;
+    gap: 3rem;
+  }
+  .counter { display: flex; flex-direction: column; }
+  .counter-value {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1;
+  }
+  .counter-suffix {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1;
+  }
+  .counter-label {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 0.4rem;
+  }
+  @media (max-width: 768px) {
+    .about-grid { grid-template-columns: 1fr; }
+    .avatar-placeholder { width: 140px; height: 140px; font-size: 3rem; }
+    .counters { flex-direction: column; gap: 1.5rem; }
+  }
+</style>
+
+<script>
+  import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  gsap.registerPlugin(ScrollTrigger);
+
+  document.querySelectorAll<HTMLElement>('.reveal').forEach((el) => {
+    gsap.fromTo(el,
+      { opacity: 0, y: 30 },
+      { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out',
+        scrollTrigger: { trigger: el, start: 'top 85%' } }
+    );
+  });
+
+  document.querySelectorAll<HTMLElement>('.counter-value').forEach((el) => {
+    const target = parseInt(el.dataset.target || '0');
+    gsap.fromTo({ val: 0 }, { val: target },
+      { duration: 1.5, ease: 'power2.out',
+        onUpdate: function() { el.textContent = Math.round(this.targets()[0].val).toString(); },
+        scrollTrigger: { trigger: el, start: 'top 85%', once: true } }
+    );
+  });
+</script>

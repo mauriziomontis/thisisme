@@ -1,0 +1,199 @@
+---
+import music from '../content/music.json';
+
+const tabs = ['Music', 'Photography', 'Travel', 'Coding'];
+---
+
+<section id="creative">
+  <div class="container">
+    <p class="label reveal">// creative</p>
+    <h2 class="section-title reveal">Beyond the Terminal</h2>
+
+    <div class="tab-bar reveal">
+      {tabs.map((tab, i) => (
+        <button class={`tab-btn ${i === 0 ? 'active' : ''}`} data-tab={tab.toLowerCase()}>
+          {tab}
+        </button>
+      ))}
+    </div>
+
+    <!-- Music -->
+    <div class="tab-panel active" data-panel="music">
+      <div class="music-grid">
+        {music.map((track) => (
+          <a href={track.url} target="_blank" rel="noopener noreferrer" class="music-card reveal">
+            <div class="music-icon">♪</div>
+            <div>
+              <p class="music-title">{track.title}</p>
+              <p class="music-desc">{track.description}</p>
+              <span class="label">{track.year}</span>
+            </div>
+          </a>
+        ))}
+        <div class="music-card reveal placeholder-card">
+          <div class="music-icon">+</div>
+          <div>
+            <p class="music-title">More coming soon</p>
+            <p class="music-desc">Add your tracks to src/content/music.json</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Photography -->
+    <div class="tab-panel" data-panel="photography">
+      <div class="photo-grid">
+        {[1,2,3,4,5,6].map((i) => (
+          <div class={`photo-placeholder reveal ${i % 3 === 0 ? 'tall' : ''}`}>
+            <span class="label">photo {i}</span>
+          </div>
+        ))}
+      </div>
+      <p class="placeholder-hint reveal">Add your photos to public/images/ and update this component</p>
+    </div>
+
+    <!-- Travel -->
+    <div class="tab-panel" data-panel="travel">
+      <div class="travel-grid">
+        {['Italy', 'Japan', 'Germany', 'France', 'Portugal', 'USA'].map((country) => (
+          <div class="travel-card reveal">
+            <span class="travel-flag">📍</span>
+            <span class="travel-name">{country}</span>
+          </div>
+        ))}
+      </div>
+      <p class="placeholder-hint reveal">Update the country list in Creative.astro</p>
+    </div>
+
+    <!-- Coding -->
+    <div class="tab-panel" data-panel="coding">
+      <div class="coding-grid">
+        {[
+          { name: 'Experiment 01', desc: 'Vibe coding experiment — short description', url: '#' },
+          { name: 'Experiment 02', desc: 'Another experiment with AI-assisted code', url: '#' },
+        ].map((exp) => (
+          <a href={exp.url} target="_blank" rel="noopener noreferrer" class="coding-card reveal">
+            <span class="card-name">&gt; {exp.name}</span>
+            <p class="card-desc">{exp.desc}</p>
+            <span class="label">open →</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  #creative { border-top: 1px solid var(--border); }
+  .section-title { font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 700; margin: 1rem 0 2.5rem; }
+
+  .tab-bar { display: flex; gap: 0.5rem; margin-bottom: 3rem; flex-wrap: wrap; }
+  .tab-btn {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    padding: 0.5rem 1.25rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: none;
+    transition: all 0.2s;
+  }
+  .tab-btn.active { border-color: var(--warm); color: var(--warm); background: color-mix(in srgb, var(--warm) 8%, transparent); }
+  .tab-btn:hover:not(.active) { border-color: var(--text); color: var(--text); }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* Music */
+  .music-grid { display: flex; flex-direction: column; gap: 1rem; max-width: 640px; }
+  .music-card {
+    display: flex;
+    gap: 1.25rem;
+    align-items: flex-start;
+    padding: 1.25rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .music-card:hover { border-color: var(--warm); transform: translateX(4px); }
+  .music-card.placeholder-card { opacity: 0.4; }
+  .music-icon { font-size: 1.5rem; flex-shrink: 0; margin-top: 2px; }
+  .music-title { font-family: var(--font-heading); font-weight: 600; margin-bottom: 0.25rem; }
+  .music-desc { font-size: 0.875rem; color: var(--muted); margin-bottom: 0.5rem; }
+
+  /* Photography */
+  .photo-grid { columns: 3 200px; gap: 0.75rem; margin-bottom: 1.5rem; }
+  .photo-placeholder {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    height: 180px;
+    display: flex;
+    align-items: flex-end;
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+    break-inside: avoid;
+  }
+  .photo-placeholder.tall { height: 260px; }
+
+  /* Travel */
+  .travel-grid { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.5rem; }
+  .travel-card {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.2rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    transition: border-color 0.2s;
+  }
+  .travel-card:hover { border-color: var(--accent); }
+  .travel-name { color: var(--text); }
+
+  /* Coding */
+  .coding-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+  .coding-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .coding-card:hover { border-color: var(--accent); transform: translateY(-3px); }
+  .card-name { font-family: var(--font-mono); font-size: 0.9rem; color: var(--accent); }
+  .card-desc { font-size: 0.875rem; color: var(--muted); line-height: 1.5; flex: 1; }
+
+  .placeholder-hint { font-size: 0.8rem; color: var(--muted); font-family: var(--font-mono); margin-top: 1rem; }
+</style>
+
+<script>
+  import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  gsap.registerPlugin(ScrollTrigger);
+
+  document.querySelectorAll<HTMLElement>('.reveal').forEach((el) => {
+    gsap.fromTo(el,
+      { opacity: 0, y: 30 },
+      { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out',
+        scrollTrigger: { trigger: el, start: 'top 85%' } }
+    );
+  });
+
+  document.querySelectorAll('.tab-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach((b) => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach((p) => p.classList.remove('active'));
+      btn.classList.add('active');
+      const panel = document.querySelector(`.tab-panel[data-panel="${(btn as HTMLElement).dataset.tab}"]`);
+      panel?.classList.add('active');
+    });
+  });
+</script>
