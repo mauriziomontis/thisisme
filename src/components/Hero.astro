@@ -1,12 +1,19 @@
 ---
+const line1 = ["I'm", "Maurizio,"];
+const line2 = ["but", "you", "can", "call", "me", "Mauri"];
 ---
 <section id="hero">
   <div class="hero-bg"></div>
   <canvas id="particles-canvas"></canvas>
   <div class="hero-content">
     <p class="label hero-label">↓ scroll to explore</p>
-    <h1 class="hero-name" aria-label="Maurizio">
-      {'Maurizio'.split('').map((c) => <span class="char" data-char={c}>{c}</span>)}
+    <h1 class="hero-name" aria-label="I'm Maurizio, but you can call me Mauri">
+      <span class="hero-line">
+        {line1.map((w) => <span class="word">{w}&nbsp;</span>)}
+      </span>
+      <span class="hero-line hero-line-2">
+        {line2.map((w) => <span class="word">{w}&nbsp;</span>)}
+      </span>
     </h1>
     <p class="hero-sub">
       Music · Photography · Travel · Code
@@ -47,23 +54,34 @@
     position: relative;
     text-align: center;
     z-index: 1;
+    padding: 0 1rem;
   }
   .hero-label {
     margin-bottom: 1.5rem;
     opacity: 0;
   }
   .hero-name {
-    font-size: clamp(4rem, 12vw, 10rem);
+    font-size: clamp(2.4rem, 6vw, 5.5rem);
     font-weight: 700;
-    letter-spacing: -0.04em;
+    letter-spacing: -0.03em;
     color: var(--text);
-    line-height: 1;
+    line-height: 1.1;
     margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.1em;
   }
-  .char {
+  .hero-line {
+    display: block;
+  }
+  .hero-line-2 {
+    color: var(--primary);
+  }
+  .word {
     display: inline-block;
     opacity: 0;
-    transform: translateY(-60px);
+    transform: translateY(-40px);
   }
   .hero-sub {
     font-family: var(--font-mono);
@@ -91,24 +109,24 @@
 <script>
   import gsap from 'gsap';
 
-  const chars = document.querySelectorAll<HTMLElement>('.char');
-  const label = document.querySelector<HTMLElement>('.hero-label');
-  const sub = document.querySelector<HTMLElement>('.hero-sub');
+  const words    = document.querySelectorAll<HTMLElement>('.word');
+  const label    = document.querySelector<HTMLElement>('.hero-label');
+  const sub      = document.querySelector<HTMLElement>('.hero-sub');
   const scrollInd = document.querySelector<HTMLElement>('.scroll-indicator');
 
   const tl = gsap.timeline({ delay: 0.3 });
-  tl.to(label, { opacity: 1, duration: 0.6, ease: 'power2.out' })
-    .to(chars, {
+  tl.to(label, { opacity: 1, duration: 0.5, ease: 'power2.out' })
+    .to(words, {
       opacity: 1,
       y: 0,
-      duration: 0.7,
-      stagger: 0.055,
+      duration: 0.65,
+      stagger: 0.1,
       ease: 'power3.out',
     }, '-=0.2')
-    .to(sub, { opacity: 1, duration: 0.6, ease: 'power2.out' }, '-=0.3')
+    .to(sub, { opacity: 1, duration: 0.6, ease: 'power2.out' }, '-=0.2')
     .to(scrollInd, { opacity: 1, duration: 0.6, ease: 'power2.out' }, '-=0.2');
 
-  // Particelle leggere
+  // Particelle
   const canvas = document.getElementById('particles-canvas') as HTMLCanvasElement;
   const ctx = canvas.getContext('2d')!;
   let W = canvas.width = canvas.offsetWidth;

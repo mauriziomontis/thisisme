@@ -19,14 +19,30 @@ const tabs = ['Music', 'Photography', 'Travel'];
 
     <!-- Music -->
     <div class="tab-panel active" data-panel="music">
+      <a href={music.sunoProfile} target="_blank" rel="noopener noreferrer" class="suno-profile reveal">
+        <div class="suno-logo">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
+          </svg>
+        </div>
+        <div>
+          <p class="suno-label">Suno Profile</p>
+          <p class="suno-handle">@mauri_issio</p>
+        </div>
+        <span class="suno-arrow">→</span>
+      </a>
+
       <div class="music-grid">
-        {music.map((track) => (
+        {music.tracks.map((track) => (
           <a href={track.url} target="_blank" rel="noopener noreferrer" class="music-card reveal">
             <div class="music-icon">♪</div>
             <div>
               <p class="music-title">{track.title}</p>
               <p class="music-desc">{track.description}</p>
-              <span class="label">{track.year}</span>
+              <div class="music-meta">
+                <span class="label">{track.year}</span>
+                <span class="label music-platform">{track.platform}</span>
+              </div>
             </div>
           </a>
         ))}
@@ -34,7 +50,7 @@ const tabs = ['Music', 'Photography', 'Travel'];
           <div class="music-icon">+</div>
           <div>
             <p class="music-title">More coming soon</p>
-            <p class="music-desc">Add your tracks to src/content/music.json</p>
+            <p class="music-desc">Add tracks to src/content/music.json</p>
           </div>
         </div>
       </div>
@@ -90,8 +106,29 @@ const tabs = ['Music', 'Photography', 'Travel'];
   .tab-panel { display: none; }
   .tab-panel.active { display: block; }
 
+  /* Suno profile banner */
+  .suno-profile {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    background: color-mix(in srgb, var(--warm) 6%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--warm) 30%, transparent);
+    border-radius: 12px;
+    max-width: 640px;
+    margin-bottom: 1.5rem;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .suno-profile:hover { border-color: var(--warm); transform: translateX(4px); }
+  .suno-logo { color: var(--warm); display: flex; align-items: center; flex-shrink: 0; }
+  .suno-label { font-family: var(--font-mono); font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  .suno-handle { font-family: var(--font-heading); font-weight: 600; color: var(--warm); font-size: 1rem; }
+  .suno-arrow { margin-left: auto; color: var(--warm); font-size: 1.1rem; }
+
   /* Music */
   .music-grid { display: flex; flex-direction: column; gap: 1rem; max-width: 640px; }
+  .music-meta { display: flex; gap: 1rem; }
+  .music-platform { color: var(--warm); }
   .music-card {
     display: flex;
     gap: 1.25rem;
