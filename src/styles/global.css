@@ -27,13 +27,19 @@ html {
 }
 
 body {
-  background-color: var(--bg);
+  background-color: var(--bg); /* fallback while WebGL loads */
   color: var(--text);
   font-family: var(--font-body);
   font-size: 16px;
   line-height: 1.6;
   overflow-x: hidden;
   cursor: none;
+}
+
+/* Lifts page content above the WebGL canvas (z-index: 0) */
+#content {
+  position: relative;
+  z-index: 1;
 }
 
 body::before {

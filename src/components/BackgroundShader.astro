@@ -1,0 +1,222 @@
+---
+import bgs from '../content/backgrounds.json';
+const { sections, opacity } = bgs;
+const activeImages = Object.entries(sections).filter(([, url]) => url !== '');
+---
+
+<canvas id="bg-canvas" aria-hidden="true"></canvas>
+
+{activeImages.length > 0 && (
+  <div id="bg-images" aria-hidden="true">
+    {activeImages.map(([section, url]) => (
+      <div
+        class="bg-img"
+        data-section={section}
+        style={`background-image: url('${url}'); --img-opacity: ${opacity};`}
+      />
+    ))}
+  </div>
+)}
+
+<style>
+  #bg-canvas {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+    /* half-resolution canvas upscaled by CSS — smooth blur adds atmosphere */
+    image-rendering: auto;
+  }
+
+  #bg-images {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .bg-img {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    transition: opacity 1.8s ease;
+    /* Option B images sit on top of shader — keep multiply for blend */
+    mix-blend-mode: luminosity;
+  }
+
+  .bg-img.active {
+    opacity: var(--img-opacity, 0.18);
+  }
+</style>
+
+<script>
+  import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  gsap.registerPlugin(ScrollTrigger);
+
+  const canvas = document.getElementById('bg-canvas') as HTMLCanvasElement | null;
+  if (!canvas) throw new Error('bg-canvas not found');
+
+  const gl = canvas.getContext('webgl');
+  if (!gl) {
+    console.warn('WebGL not supported — shader background disabled');
+  } else {
+    // ── Shaders ────────────────────────────────────────────────────────────────
+    const VS = /* glsl */`
+      attribute vec2 a_pos;
+      void main() { gl_Position = vec4(a_pos, 0.0, 1.0); }
+    `;
+
+    const FS = /* glsl */`
+      precision mediump float;
+      uniform float u_time;
+      uniform vec2  u_res;
+      uniform vec3  u_color;
+
+      /* Value noise */
+      float hash(vec2 p) {
+        p = fract(p * vec2(127.1, 311.7));
+        p += dot(p, p + 74.27);
+        return fract(p.x * p.y);
+      }
+
+      float noise(vec2 p) {
+        vec2 i = floor(p);
+        vec2 f = fract(p);
+        f = f * f * (3.0 - 2.0 * f);
+        return mix(
+          mix(hash(i),                    hash(i + vec2(1.0, 0.0)), f.x),
+          mix(hash(i + vec2(0.0, 1.0)),  hash(i + vec2(1.0, 1.0)), f.x),
+          f.y
+        );
+      }
+
+      /* FBM — 4 octaves, rotated for organic variety */
+      float fbm(vec2 p) {
+        float v = 0.0;
+        float a = 0.5;
+        mat2  m = mat2(1.6, 1.2, -1.2, 1.6);
+        for (int i = 0; i < 4; i++) {
+          v += a * noise(p);
+          p  = m * p;
+          a *= 0.5;
+        }
+        return v;
+      }
+
+      void main() {
+        vec2 uv = gl_FragCoord.xy / u_res;
+        uv.y    = 1.0 - uv.y;
+        float t = u_time * 0.05;
+
+        /* Domain warping — two gentle sinusoidal offsets */
+        vec2 warp = vec2(
+          sin(uv.y * 2.8 + t * 1.1) * 0.12,
+          cos(uv.x * 3.1 + t * 0.8) * 0.12
+        );
+
+        float f1 = fbm((uv + warp) * 2.2 + t * 0.08);
+        float f2 = fbm((uv - warp) * 1.6 + vec2(5.3, 2.1) + t * 0.05);
+
+        float shape = pow(clamp(f1 * 0.65 + f2 * 0.35, 0.0, 1.0), 1.8);
+
+        /* Spatial weighting: glowing edges, dark center (aids readability) */
+        float dist = length(uv - 0.5);
+        float edge   = smoothstep(0.1, 0.65, dist);
+        float center = 1.0 - smoothstep(0.0, 0.45, dist);
+
+        float brightness = shape * (0.06 + edge * 0.24) + center * 0.025;
+
+        gl_FragColor = vec4(u_color * brightness, 1.0);
+      }
+    `;
+
+    // ── Compile & link ─────────────────────────────────────────────────────────
+    function mkShader(type: number, src: string) {
+      const s = gl!.createShader(type)!;
+      gl!.shaderSource(s, src);
+      gl!.compileShader(s);
+      return s;
+    }
+
+    const prog = gl.createProgram()!;
+    gl.attachShader(prog, mkShader(gl.VERTEX_SHADER, VS));
+    gl.attachShader(prog, mkShader(gl.FRAGMENT_SHADER, FS));
+    gl.linkProgram(prog);
+    gl.useProgram(prog);
+
+    // Fullscreen quad (triangle strip)
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+    const aPos = gl.getAttribLocation(prog, 'a_pos');
+    gl.enableVertexAttribArray(aPos);
+    gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+    const uTime  = gl.getUniformLocation(prog, 'u_time')!;
+    const uRes   = gl.getUniformLocation(prog, 'u_res')!;
+    const uColor = gl.getUniformLocation(prog, 'u_color')!;
+
+    // ── Resize — render at 50% for performance ──────────────────────────────────
+    function resize() {
+      canvas!.width  = Math.max(1, Math.floor(window.innerWidth  / 2));
+      canvas!.height = Math.max(1, Math.floor(window.innerHeight / 2));
+      gl!.viewport(0, 0, canvas!.width, canvas!.height);
+      gl!.uniform2f(uRes, canvas!.width, canvas!.height);
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    // ── Color state tweened by GSAP ────────────────────────────────────────────
+    const color = { r: 0.0, g: 0.83, b: 1.0 }; // initial: hero cyan
+
+    // ── Render loop capped at ~30fps ───────────────────────────────────────────
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let lastT = 0;
+
+    function draw(time: number) {
+      requestAnimationFrame(draw);
+      if (reduced) return;
+      if (time - lastT < 33) return;
+      lastT = time;
+      gl!.uniform1f(uTime, time * 0.001);
+      gl!.uniform3f(uColor, color.r, color.g, color.b);
+      gl!.drawArrays(gl!.TRIANGLE_STRIP, 0, 4);
+    }
+    requestAnimationFrame(draw);
+
+    // ── Section → color + image ────────────────────────────────────────────────
+    const sectionColors: Record<string, [number, number, number]> = {
+      hero:     [0.0,  0.83, 1.0 ],  // #00d4ff cyan
+      about:    [0.02, 0.84, 0.63],  // #06d6a0 teal
+      projects: [0.75, 0.37, 1.0 ],  // #bf5fff purple
+      creative: [1.0,  0.18, 0.47],  // #ff2d78 magenta
+      courses:  [1.0,  0.55, 0.0 ],  // #ff8c00 amber
+      contact:  [0.31, 0.56, 0.97],  // #4f8ef7 blue
+    };
+
+    const bgImgs = document.querySelectorAll<HTMLElement>('.bg-img');
+
+    function activate(id: string) {
+      const [r, g, b] = sectionColors[id] ?? [0.31, 0.56, 0.97];
+      gsap.to(color, { r, g, b, duration: 1.5, ease: 'power2.inOut' });
+      bgImgs.forEach(el => el.classList.toggle('active', el.dataset.section === id));
+    }
+
+    ['hero', 'about', 'projects', 'creative', 'courses', 'contact'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      ScrollTrigger.create({
+        trigger: el,
+        start: 'top 60%',
+        end: 'bottom 40%',
+        onEnter:     () => activate(id),
+        onEnterBack: () => activate(id),
+      });
+    });
+  }
+</script>

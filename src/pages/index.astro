@@ -10,19 +10,23 @@ import Courses from '../components/Courses.astro';
 import Contact from '../components/Contact.astro';
 import CircuitPanel from '../components/CircuitPanel.astro';
 import CircuitPanelLeft from '../components/CircuitPanelLeft.astro';
+import BackgroundShader from '../components/BackgroundShader.astro';
 ---
 
 <Base>
-  <Cursor />
-  <Nav />
-  <CircuitPanel />
-  <CircuitPanelLeft />
-  <main>
-    <Hero />
-    <About />
-    <Projects />
-    <Creative />
-    <Courses />
-    <Contact />
-  </main>
+  <BackgroundShader />
+  <div id="content">
+    <Cursor />
+    <Nav />
+    <CircuitPanel />
+    <CircuitPanelLeft />
+    <main>
+      <Hero />
+      <About />
+      <Projects />
+      <Creative />
+      <Courses />
+      <Contact />
+    </main>
+  </div>
 </Base>
