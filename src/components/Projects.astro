@@ -14,7 +14,10 @@ const { featured } = projectsConfig;
 
 let repos: Repo[] = [];
 try {
-  const res = await fetch('https://api.github.com/users/mauriziomontis/repos?per_page=100&sort=updated');
+  const token = import.meta.env.GH_TOKEN;
+  const headers: Record<string, string> = { 'Accept': 'application/vnd.github.v3+json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const res = await fetch('https://api.github.com/users/mauriziomontis/repos?per_page=100&sort=updated', { headers });
   if (res.ok) repos = await res.json();
 } catch (_) {}
 
