@@ -9,13 +9,19 @@ interface Repo {
   topics: string[];
 }
 
+import projectsConfig from '../content/projects.json';
+const { featured } = projectsConfig;
+
 let repos: Repo[] = [];
 try {
   const res = await fetch('https://api.github.com/users/mauriziomontis/repos?per_page=100&sort=updated');
   if (res.ok) repos = await res.json();
 } catch (_) {}
 
-const filtered = repos.filter((r) => !r.name.includes('.github.io') && r.name !== 'thisisme');
+// Se la lista featured è vuota mostra placeholder, altrimenti filtra per nome
+const filtered = featured.length > 0
+  ? repos.filter((r) => featured.includes(r.name))
+  : [];
 ---
 
 <section id="projects">

@@ -1,7 +1,7 @@
 ---
 import music from '../content/music.json';
 
-const tabs = ['Music', 'Photography', 'Travel', 'Coding'];
+const tabs = ['Music', 'Photography', 'Travel'];
 ---
 
 <section id="creative">
@@ -65,21 +65,6 @@ const tabs = ['Music', 'Photography', 'Travel', 'Coding'];
       <p class="placeholder-hint reveal">Update the country list in Creative.astro</p>
     </div>
 
-    <!-- Coding -->
-    <div class="tab-panel" data-panel="coding">
-      <div class="coding-grid">
-        {[
-          { name: 'Experiment 01', desc: 'Vibe coding experiment — short description', url: '#' },
-          { name: 'Experiment 02', desc: 'Another experiment with AI-assisted code', url: '#' },
-        ].map((exp) => (
-          <a href={exp.url} target="_blank" rel="noopener noreferrer" class="coding-card reveal">
-            <span class="card-name">&gt; {exp.name}</span>
-            <p class="card-desc">{exp.desc}</p>
-            <span class="label">open →</span>
-          </a>
-        ))}
-      </div>
-    </div>
   </div>
 </section>
 
