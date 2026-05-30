@@ -1,0 +1,300 @@
+---
+---
+<div id="circuit-panel-left" aria-hidden="true">
+  <svg id="circuit-svg-left" viewBox="0 0 80 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+
+    <!-- ══════════════════════════ DUAL BACKBONE ══════════════════════════════ -->
+    <line class="cp" x1="22" y1="0" x2="22" y2="800" stroke-width="1.5"/>
+    <line class="cp" x1="58" y1="0" x2="58" y2="800" stroke-width="1.5"/>
+
+    <!-- ═════════════════════════ GROUP A (0–100) ══════════════════════════════ -->
+    <!-- full cross + bi-directional branches -->
+    <circle class="cd" cx="22" cy="20" r="3.5"/>
+    <circle class="cd" cx="58" cy="20" r="3.5"/>
+    <line class="cp" x1="22" y1="20" x2="58" y2="20" stroke-width="1"/>
+    <line class="cp" x1="5"  y1="20" x2="22" y2="20" stroke-width="1.5"/>
+    <rect class="cpd" x="1"  y="15" width="8" height="8"/>
+    <line class="cp" x1="58" y1="20" x2="75" y2="20" stroke-width="1.5"/>
+    <rect class="cpd" x="71" y="15" width="8" height="8"/>
+
+    <!-- L-route: left → mid → right -->
+    <circle class="cd" cx="22" cy="48" r="3"/>
+    <line class="cp" x1="22" y1="48" x2="38" y2="48" stroke-width="1.5"/>
+    <circle class="cd" cx="38" cy="48" r="2.5"/>
+    <line class="cp" x1="38" y1="48" x2="38" y2="68" stroke-width="1.5"/>
+    <circle class="cd" cx="38" cy="68" r="2.5"/>
+    <line class="cp" x1="38" y1="68" x2="58" y2="68" stroke-width="1.5"/>
+    <circle class="cd" cx="58" cy="68" r="3"/>
+
+    <circle class="cd" cx="58" cy="88" r="3"/>
+    <line class="cp" x1="58" y1="88" x2="74" y2="88" stroke-width="1.5"/>
+    <rect class="cpd" x="71" y="83" width="8" height="8"/>
+
+    <!-- ═════════════════════════ GROUP B (100–200) — IC CHIP 1 ════════════════ -->
+    <circle class="cd" cx="22" cy="112" r="3.5"/>
+    <line class="cp" x1="5"  y1="112" x2="22" y2="112" stroke-width="1.5"/>
+    <!-- IC body -->
+    <rect class="cpd" x="28" y="118" width="24" height="36" stroke-width="1.2"/>
+    <!-- left pins -->
+    <line class="cp" x1="14" y1="124" x2="28" y2="124" stroke-width="1.2"/>
+    <circle class="cd" cx="14" cy="124" r="2"/>
+    <line class="cp" x1="14" y1="132" x2="28" y2="132" stroke-width="1.2"/>
+    <circle class="cd" cx="14" cy="132" r="2"/>
+    <line class="cp" x1="14" y1="140" x2="28" y2="140" stroke-width="1.2"/>
+    <circle class="cd" cx="14" cy="140" r="2"/>
+    <!-- right pins -->
+    <line class="cp" x1="52" y1="124" x2="66" y2="124" stroke-width="1.2"/>
+    <circle class="cd" cx="66" cy="124" r="2"/>
+    <line class="cp" x1="52" y1="132" x2="66" y2="132" stroke-width="1.2"/>
+    <circle class="cd" cx="66" cy="132" r="2"/>
+    <line class="cp" x1="52" y1="140" x2="66" y2="140" stroke-width="1.2"/>
+    <circle class="cd" cx="66" cy="140" r="2"/>
+
+    <circle class="cd" cx="22" cy="162" r="3"/>
+    <circle class="cd" cx="58" cy="162" r="3"/>
+    <line class="cp" x1="22" y1="162" x2="58" y2="162" stroke-width="1"/>
+    <circle class="cd" cx="58" cy="182" r="3"/>
+    <line class="cp" x1="58" y1="182" x2="74" y2="182" stroke-width="1.5"/>
+    <rect class="cpd" x="71" y="177" width="8" height="8"/>
+    <circle class="cd" cx="22" cy="195" r="3"/>
+
+    <!-- ═════════════════════════ GROUP C (200–300) ════════════════════════════ -->
+    <circle class="cd" cx="22" cy="215" r="3.5"/>
+    <circle class="cd" cx="58" cy="215" r="3.5"/>
+    <line class="cp" x1="4"  y1="215" x2="22" y2="215" stroke-width="1.5"/>
+    <rect class="cpd" x="0"  y="210" width="8" height="8"/>
+
+    <!-- stepped L-route: (22,238)→(38,238)→(38,258)→(58,258) -->
+    <circle class="cd" cx="22" cy="238" r="3"/>
+    <line class="cp" x1="22" y1="238" x2="38" y2="238" stroke-width="1.5"/>
+    <circle class="cd" cx="38" cy="238" r="2.5"/>
+    <line class="cp" x1="38" y1="238" x2="38" y2="258" stroke-width="1.5"/>
+    <circle class="cd" cx="38" cy="258" r="2.5"/>
+    <line class="cp" x1="38" y1="258" x2="58" y2="258" stroke-width="1.5"/>
+    <circle class="cd" cx="58" cy="258" r="3"/>
+
+    <!-- right L-out -->
+    <circle class="cd" cx="58" cy="275" r="2.5"/>
+    <line class="cp" x1="58" y1="275" x2="74" y2="275" stroke-width="1.5"/>
+    <line class="cp" x1="74" y1="275" x2="74" y2="290" stroke-width="1.5"/>
+    <circle class="cd" cx="74" cy="290" r="2.5"/>
+
+    <circle class="cd" cx="22" cy="295" r="3"/>
+
+    <!-- ═════════════════════════ GROUP D (300–400) — IC CHIP 2 ════════════════ -->
+    <!-- triple-node cross -->
+    <circle class="cd" cx="22" cy="318" r="3"/>
+    <circle class="cd" cx="40" cy="318" r="2.5"/>
+    <circle class="cd" cx="58" cy="318" r="3"/>
+    <line class="cp" x1="22" y1="318" x2="58" y2="318" stroke-width="1"/>
+
+    <circle class="cd" cx="22" cy="335" r="3"/>
+    <line class="cp" x1="5"  y1="335" x2="22" y2="335" stroke-width="1.5"/>
+    <!-- IC body 2 -->
+    <rect class="cpd" x="28" y="340" width="24" height="34" stroke-width="1.2"/>
+    <!-- left pins -->
+    <line class="cp" x1="14" y1="346" x2="28" y2="346" stroke-width="1.2"/>
+    <circle class="cd" cx="14" cy="346" r="2"/>
+    <line class="cp" x1="14" y1="354" x2="28" y2="354" stroke-width="1.2"/>
+    <circle class="cd" cx="14" cy="354" r="2"/>
+    <line class="cp" x1="14" y1="362" x2="28" y2="362" stroke-width="1.2"/>
+    <circle class="cd" cx="14" cy="362" r="2"/>
+    <!-- right pins -->
+    <line class="cp" x1="52" y1="346" x2="66" y2="346" stroke-width="1.2"/>
+    <circle class="cd" cx="66" cy="346" r="2"/>
+    <line class="cp" x1="52" y1="354" x2="66" y2="354" stroke-width="1.2"/>
+    <circle class="cd" cx="66" cy="354" r="2"/>
+    <line class="cp" x1="52" y1="362" x2="66" y2="362" stroke-width="1.2"/>
+    <circle class="cd" cx="66" cy="362" r="2"/>
+
+    <circle class="cd" cx="58" cy="382" r="3"/>
+    <line class="cp" x1="58" y1="382" x2="74" y2="382" stroke-width="1.5"/>
+    <rect class="cpd" x="71" y="377" width="8" height="8"/>
+    <circle class="cd" cx="22" cy="395" r="3"/>
+
+    <!-- ═════════════════════════ GROUP E (400–500) ════════════════════════════ -->
+    <circle class="cd" cx="22" cy="410" r="3"/>
+    <circle class="cd" cx="58" cy="410" r="3"/>
+    <line class="cp" x1="22" y1="410" x2="58" y2="410" stroke-width="1"/>
+
+    <circle class="cd" cx="22" cy="425" r="2.5"/>
+    <line class="cp" x1="5"  y1="425" x2="22" y2="425" stroke-width="1.5"/>
+    <circle class="cd" cx="58" cy="425" r="2.5"/>
+    <line class="cp" x1="58" y1="425" x2="74" y2="425" stroke-width="1.5"/>
+    <rect class="cpd" x="71" y="420" width="8" height="8"/>
+
+    <!-- L-route -->
+    <circle class="cd" cx="22" cy="448" r="3"/>
+    <line class="cp" x1="22" y1="448" x2="40" y2="448" stroke-width="1.5"/>
+    <circle class="cd" cx="40" cy="448" r="2.5"/>
+    <line class="cp" x1="40" y1="448" x2="40" y2="468" stroke-width="1.5"/>
+    <circle class="cd" cx="40" cy="468" r="2.5"/>
+    <line class="cp" x1="40" y1="468" x2="58" y2="468" stroke-width="1.5"/>
+    <circle class="cd" cx="58" cy="468" r="3"/>
+
+    <circle class="cd" cx="22" cy="485" r="3"/>
+    <circle class="cd" cx="58" cy="485" r="3"/>
+    <line class="cp" x1="22" y1="485" x2="58" y2="485" stroke-width="1"/>
+
+    <!-- ═════════════════════════ GROUP F (500–600) — IC CHIP 3 ════════════════ -->
+    <circle class="cd" cx="22" cy="512" r="3.5"/>
+    <line class="cp" x1="5"  y1="512" x2="22" y2="512" stroke-width="1.5"/>
+    <!-- IC body 3 (4 pins per side) -->
+    <rect class="cpd" x="28" y="518" width="24" height="42" stroke-width="1.2"/>
+    <!-- left pins -->
+    <line class="cp" x1="14" y1="524" x2="28" y2="524" stroke-width="1.2"/>
+    <circle class="cd" cx="14" cy="524" r="2"/>
+    <line class="cp" x1="14" y1="532" x2="28" y2="532" stroke-width="1.2"/>
+    <circle class="cd" cx="14" cy="532" r="2"/>
+    <line class="cp" x1="14" y1="540" x2="28" y2="540" stroke-width="1.2"/>
+    <circle class="cd" cx="14" cy="540" r="2"/>
+    <line class="cp" x1="14" y1="548" x2="28" y2="548" stroke-width="1.2"/>
+    <circle class="cd" cx="14" cy="548" r="2"/>
+    <!-- right pins -->
+    <line class="cp" x1="52" y1="524" x2="66" y2="524" stroke-width="1.2"/>
+    <circle class="cd" cx="66" cy="524" r="2"/>
+    <line class="cp" x1="52" y1="532" x2="66" y2="532" stroke-width="1.2"/>
+    <circle class="cd" cx="66" cy="532" r="2"/>
+    <line class="cp" x1="52" y1="540" x2="66" y2="540" stroke-width="1.2"/>
+    <circle class="cd" cx="66" cy="540" r="2"/>
+    <line class="cp" x1="52" y1="548" x2="66" y2="548" stroke-width="1.2"/>
+    <circle class="cd" cx="66" cy="548" r="2"/>
+
+    <circle class="cd" cx="22" cy="572" r="3"/>
+    <circle class="cd" cx="58" cy="572" r="3"/>
+    <line class="cp" x1="22" y1="572" x2="58" y2="572" stroke-width="1"/>
+    <circle class="cd" cx="58" cy="588" r="2.5"/>
+    <line class="cp" x1="58" y1="588" x2="74" y2="588" stroke-width="1.5"/>
+    <circle class="cd" cx="22" cy="598" r="3"/>
+
+    <!-- ═════════════════════════ GROUP G (600–700) ════════════════════════════ -->
+    <circle class="cd" cx="22" cy="615" r="3"/>
+    <circle class="cd" cx="58" cy="615" r="3"/>
+    <line class="cp" x1="22" y1="615" x2="58" y2="615" stroke-width="1"/>
+
+    <circle class="cd" cx="22" cy="630" r="2.5"/>
+    <line class="cp" x1="5"  y1="630" x2="22" y2="630" stroke-width="1.5"/>
+    <rect class="cpd" x="1"  y="625" width="8" height="8"/>
+
+    <!-- complex stepped route -->
+    <circle class="cd" cx="22" cy="648" r="3"/>
+    <line class="cp" x1="22" y1="648" x2="38" y2="648" stroke-width="1.5"/>
+    <circle class="cd" cx="38" cy="648" r="2.5"/>
+    <line class="cp" x1="38" y1="648" x2="38" y2="662" stroke-width="1.5"/>
+    <circle class="cd" cx="38" cy="662" r="2.5"/>
+    <line class="cp" x1="38" y1="662" x2="58" y2="662" stroke-width="1.5"/>
+    <circle class="cd" cx="58" cy="662" r="3"/>
+
+    <circle class="cd" cx="58" cy="678" r="2.5"/>
+    <line class="cp" x1="58" y1="678" x2="75" y2="678" stroke-width="1.5"/>
+
+    <circle class="cd" cx="22" cy="690" r="3"/>
+    <circle class="cd" cx="58" cy="690" r="3"/>
+    <line class="cp" x1="22" y1="690" x2="58" y2="690" stroke-width="1"/>
+
+    <!-- ═════════════════════════ GROUP H (700–800) ════════════════════════════ -->
+    <circle class="cd" cx="22" cy="715" r="3.5"/>
+    <circle class="cd" cx="58" cy="715" r="3.5"/>
+    <line class="cp" x1="5"  y1="715" x2="22" y2="715" stroke-width="1.5"/>
+    <rect class="cpd" x="1"  y="710" width="8" height="8"/>
+    <circle class="cd" cx="58" cy="730" r="2.5"/>
+    <line class="cp" x1="58" y1="730" x2="75" y2="730" stroke-width="1.5"/>
+
+    <!-- triple-node cross -->
+    <circle class="cd" cx="22" cy="748" r="3"/>
+    <circle class="cd" cx="40" cy="748" r="2.5"/>
+    <circle class="cd" cx="58" cy="748" r="3"/>
+    <line class="cp" x1="22" y1="748" x2="58" y2="748" stroke-width="1"/>
+
+    <circle class="cd" cx="22" cy="765" r="2.5"/>
+    <line class="cp" x1="5"  y1="765" x2="22" y2="765" stroke-width="1.5"/>
+    <circle class="cd" cx="58" cy="775" r="2.5"/>
+    <line class="cp" x1="58" y1="775" x2="73" y2="775" stroke-width="1.5"/>
+    <rect class="cpd" x="70" y="770" width="8" height="8"/>
+
+    <circle class="cd" cx="22" cy="792" r="3.5"/>
+    <circle class="cd" cx="58" cy="792" r="3.5"/>
+
+    <!-- ══════════════════ FLOW TRACES (left panel) ═══════════════════════════ -->
+    <!-- left backbone top — down -->
+    <line class="cf cf-slow"    x1="22" y1="0"   x2="22" y2="200" stroke-width="1.5"/>
+    <!-- cross at y=20 — right -->
+    <line class="cf cf-fast"    x1="22" y1="20"  x2="58" y2="20"  stroke-width="1"/>
+    <!-- right backbone mid — up -->
+    <line class="cf cf-rev"     x1="58" y1="250" x2="58" y2="450" stroke-width="1.5"/>
+    <!-- cross at y=318 — left (reverse) -->
+    <line class="cf cf-rev"     x1="22" y1="318" x2="58" y2="318" stroke-width="1"/>
+    <!-- L-route group E — right -->
+    <line class="cf cf-fast"    x1="40" y1="468" x2="58" y2="468" stroke-width="1"/>
+    <!-- left backbone bottom — down -->
+    <line class="cf cf-slow"    x1="22" y1="580" x2="22" y2="800" stroke-width="1.5"/>
+  </svg>
+</div>
+
+<style>
+  #circuit-panel-left {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 80px;
+    height: 100vh;
+    z-index: 50;
+    pointer-events: none;
+    mask-image: linear-gradient(to bottom,
+      transparent 0%,
+      black 8%,
+      black 92%,
+      transparent 100%
+    );
+    opacity: 0.85;
+  }
+
+  #circuit-svg-left {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Initial colors — identical to right panel so they start in sync */
+  .cp {
+    stroke: #4f8ef7;
+    fill: none;
+    stroke-linecap: round;
+    transition: stroke 0.9s ease, filter 0.9s ease;
+    filter: drop-shadow(0 0 3px #4f8ef7);
+  }
+  .cd {
+    fill: #4f8ef7;
+    transition: fill 0.9s ease, filter 0.9s ease;
+    filter: drop-shadow(0 0 5px #4f8ef7);
+  }
+  .cpd {
+    fill: none;
+    stroke: #4f8ef7;
+    stroke-width: 1;
+    transition: stroke 0.9s ease, filter 0.9s ease;
+    filter: drop-shadow(0 0 3px #4f8ef7);
+  }
+
+  @keyframes flowDown  { from { stroke-dashoffset: 40; } to { stroke-dashoffset: 0; } }
+  @keyframes flowRight { from { stroke-dashoffset: 30; } to { stroke-dashoffset: 0; } }
+
+  .cf {
+    stroke: #4f8ef7;
+    fill: none;
+    stroke-dasharray: 7 13;
+    stroke-linecap: round;
+    opacity: 0.75;
+    transition: stroke 0.9s ease;
+    animation: flowDown 2s linear infinite;
+  }
+  .cf.cf-slow { animation-duration: 3.2s; }
+  .cf.cf-fast { animation-duration: 1.3s; animation-name: flowRight; }
+  .cf.cf-rev  { animation-direction: reverse; }
+
+  @media (max-width: 1100px) {
+    #circuit-panel-left { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cf { animation: none; }
+  }
+</style>
