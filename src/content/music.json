@@ -2,20 +2,20 @@
   "sunoProfile": "https://suno.com/@mauri_issio",
   "tracks": [
     {
-      "title": "Track Title 01",
-      "description": "AI-generated ambient piece",
-      "url": "https://suno.com/@mauri_issio",
+      "title": "Shadow Pangolins (影子穿山甲)",
+      "description": "Theme song for IPAC 2025",
+      "url": "#",
       "platform": "suno",
       "year": 2025,
-      "audioFile": ""
+      "audioFile": "/audio/Shadow_Pangolins.mp3"
     },
     {
-      "title": "Track Title 02",
-      "description": "Experimental electronic composition",
-      "url": "https://suno.com/@mauri_issio",
+      "title": "Passe-le au Vert",
+      "description": "Theme song for IPAC 2026",
+      "url": "#",
       "platform": "suno",
-      "year": 2025,
-      "audioFile": ""
+      "year": 2026,
+      "audioFile": "/audio/Passe-le_au_Vert.mp3"
     }
   ]
 }
