@@ -1,8 +1,25 @@
 ---
+import travel from '../content/travel.json';
+
+const countriesVisited = travel.visited.length;
+
+// GitHub public repos count — fetched at build time
+let repoCount = 0;
+try {
+  const token = import.meta.env.GH_TOKEN;
+  const headers: Record<string, string> = { 'Accept': 'application/vnd.github.v3+json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const res = await fetch('https://api.github.com/users/mauriziomontis', { headers });
+  if (res.ok) {
+    const data: { public_repos: number } = await res.json();
+    repoCount = data.public_repos;
+  }
+} catch (_) {}
+
 const counters = [
-  { value: 10, label: 'years of experience', suffix: '+' },
-  { value: 20, label: 'github projects', suffix: '+' },
-  { value: 15, label: 'countries visited', suffix: '' },
+  { value: 10,               label: 'years of experience', suffix: '+' },
+  { value: repoCount,        label: 'github projects',     suffix: ''  },
+  { value: countriesVisited, label: 'countries visited',   suffix: ''  },
 ];
 ---
 <section id="about">
