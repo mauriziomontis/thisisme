@@ -21,7 +21,7 @@ const counters = [
         </p>
         <div class="counters">
           {counters.map((c) => (
-            <div class="counter reveal">
+            <div class="counter-glass reveal">
               <span class="counter-num">
                 <span class="counter-value" data-target={c.value}>{c.value}</span><span class="counter-suffix">{c.suffix}</span>
               </span>
@@ -74,32 +74,43 @@ const counters = [
   }
   .counters {
     display: flex;
-    gap: 3rem;
+    gap: 1.25rem;
     align-items: flex-start;
+    flex-wrap: wrap;
   }
-  .counter {
+  .counter-glass {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    padding: 1.25rem 1.5rem;
+    border-radius: 14px;
+    background: var(--surface-glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border-glow);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+    transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .counter-glass:hover {
+    border-color: var(--purple);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(102, 126, 234, 0.15);
   }
   .counter-num {
     display: block;
     white-space: nowrap;
     line-height: 1;
   }
-  .counter-value {
-    font-family: var(--font-heading);
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: var(--primary);
-    line-height: 1;
-  }
+  .counter-value,
   .counter-suffix {
     font-family: var(--font-heading);
     font-size: 2.5rem;
     font-weight: 700;
-    color: var(--primary);
     line-height: 1;
+    background: var(--grad-tech);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
   .counter-label {
     font-family: var(--font-mono);

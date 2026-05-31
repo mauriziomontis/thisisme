@@ -35,23 +35,31 @@ const tabs = ['Music', 'Photography', 'Travel'];
       <div class="music-grid">
         {music.tracks.map((track) => (
           <a href={track.url} target="_blank" rel="noopener noreferrer" class="music-card reveal">
-            <div class="music-icon">♪</div>
-            <div>
-              <p class="music-title">{track.title}</p>
-              <p class="music-desc">{track.description}</p>
-              <div class="music-meta">
-                <span class="label">{track.year}</span>
-                <span class="label music-platform">{track.platform}</span>
-              </div>
+            <div class="music-card-top">
+              <div class="music-icon-badge">♪</div>
+              <span class="track-year label">{track.year}</span>
             </div>
+            <div class="music-waveform" aria-hidden="true">
+              <svg viewBox="0 0 300 60" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%"   stop-color="var(--purple)"/>
+                    <stop offset="100%" stop-color="var(--magenta)"/>
+                  </linearGradient>
+                </defs>
+                <path d="M0,30 Q25,10 50,30 T100,30 T150,30 T200,30 T250,30 T300,30"
+                      fill="none" stroke="url(#waveGrad)" stroke-width="2.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <p class="music-title">{track.title}</p>
+            <p class="music-desc">{track.description}</p>
+            <span class="label music-platform">{track.platform}</span>
           </a>
         ))}
         <div class="music-card reveal placeholder-card">
-          <div class="music-icon">+</div>
-          <div>
-            <p class="music-title">More coming soon</p>
-            <p class="music-desc">Add tracks to src/content/music.json</p>
-          </div>
+          <div class="music-icon-badge">+</div>
+          <p class="music-title" style="margin-top:1rem">More coming soon</p>
+          <p class="music-desc">Add tracks to src/content/music.json</p>
         </div>
       </div>
     </div>
@@ -72,7 +80,7 @@ const tabs = ['Music', 'Photography', 'Travel'];
     <div class="tab-panel" data-panel="travel">
       <div class="travel-grid">
         {['Italy', 'Japan', 'Germany', 'France', 'Portugal', 'USA'].map((country) => (
-          <div class="travel-card reveal">
+          <div class="travel-card glass-card reveal">
             <span class="travel-flag">📍</span>
             <span class="travel-name">{country}</span>
           </div>
@@ -100,7 +108,7 @@ const tabs = ['Music', 'Photography', 'Travel'];
     cursor: none;
     transition: all 0.2s;
   }
-  .tab-btn.active { border-color: var(--warm); color: var(--warm); background: color-mix(in srgb, var(--warm) 8%, transparent); }
+  .tab-btn.active { border-color: var(--purple); color: var(--purple); background: color-mix(in srgb, var(--purple) 10%, transparent); }
   .tab-btn:hover:not(.active) { border-color: var(--text); color: var(--text); }
 
   .tab-panel { display: none; }
@@ -138,24 +146,43 @@ const tabs = ['Music', 'Photography', 'Travel'];
   .suno-arrow { margin-left: auto; color: var(--warm); font-size: 1.1rem; }
 
   /* Music */
-  .music-grid { display: flex; flex-direction: column; gap: 1rem; max-width: 640px; }
-  .music-meta { display: flex; gap: 1rem; }
-  .music-platform { color: var(--warm); }
+  .music-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.25rem; max-width: 860px; }
+  .music-platform { color: var(--magenta); }
   .music-card {
     display: flex;
-    gap: 1.25rem;
-    align-items: flex-start;
-    padding: 1.25rem;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    transition: border-color 0.2s, transform 0.2s;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.5rem;
+    background: var(--surface-glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border-glow);
+    border-radius: 16px;
+    transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    text-decoration: none;
+    color: inherit;
   }
-  .music-card:hover { border-color: var(--warm); transform: translateX(4px); }
-  .music-card.placeholder-card { opacity: 0.4; }
-  .music-icon { font-size: 1.5rem; flex-shrink: 0; margin-top: 2px; }
-  .music-title { font-family: var(--font-heading); font-weight: 600; margin-bottom: 0.25rem; }
-  .music-desc { font-size: 0.875rem; color: var(--muted); margin-bottom: 0.5rem; }
+  .music-card:hover {
+    border-color: var(--purple);
+    transform: translateY(-6px);
+    box-shadow: 0 16px 40px rgba(102, 126, 234, 0.18),
+                0 0 60px rgba(240, 147, 251, 0.08);
+  }
+  .music-card.placeholder-card { opacity: 0.35; }
+  .music-card-top { display: flex; justify-content: space-between; align-items: center; }
+  .music-icon-badge {
+    width: 42px; height: 42px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--grad-creative);
+    border-radius: 10px;
+    font-size: 1.3rem;
+    color: #fff;
+  }
+  .track-year { color: var(--muted); }
+  .music-waveform { height: 40px; display: flex; align-items: center; }
+  .music-waveform svg { width: 100%; height: 100%; }
+  .music-title { font-family: var(--font-heading); font-weight: 600; font-size: 1rem; }
+  .music-desc { font-size: 0.875rem; color: var(--muted); flex: 1; }
 
   /* Photography */
   .photo-grid { columns: 3 200px; gap: 0.75rem; margin-bottom: 1.5rem; }
@@ -173,20 +200,28 @@ const tabs = ['Music', 'Photography', 'Travel'];
   .photo-placeholder.tall { height: 260px; }
 
   /* Travel */
-  .travel-grid { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.5rem; justify-content: center; }
+  .travel-grid { display: flex; flex-wrap: wrap; gap: 0.875rem; margin-bottom: 1.5rem; justify-content: center; }
+  .glass-card {
+    background: var(--surface-glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border-glow);
+  }
   .travel-card {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.6rem 1.2rem;
-    background: var(--surface);
-    border: 1px solid var(--border);
+    padding: 0.7rem 1.4rem;
     border-radius: 999px;
     font-family: var(--font-mono);
     font-size: 0.85rem;
-    transition: border-color 0.2s;
+    transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
   }
-  .travel-card:hover { border-color: var(--accent); }
+  .travel-card:hover {
+    border-color: var(--purple);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.12);
+  }
   .travel-name { color: var(--text); }
 
   /* Coding */

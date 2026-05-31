@@ -126,9 +126,10 @@ const filtered = featured.length > 0
     transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
   }
   .project-card:hover {
-    transform: translateY(-4px);
-    border-color: color-mix(in srgb, var(--primary) 40%, transparent);
-    box-shadow: 0 8px 30px color-mix(in srgb, var(--primary) 10%, transparent);
+    transform: translateY(-6px);
+    border-color: var(--border-glow);
+    box-shadow: 0 12px 40px rgba(102, 126, 234, 0.15),
+                0 0 0 1px var(--border-glow);
   }
   .placeholder-card { opacity: 0.4; }
   .card-header {

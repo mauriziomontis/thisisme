@@ -25,3 +25,6 @@ pnpm-debug.log*
 
 # brainstorm session files
 .superpowers/
+
+# design notes (local only)
+analisi_layout.md

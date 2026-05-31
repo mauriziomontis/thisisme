@@ -5,6 +5,11 @@ const line2 = ["but", "you", "can", "call", "me", "Mauri"];
 <section id="hero">
   <div class="hero-bg"></div>
   <canvas id="particles-canvas"></canvas>
+  <!-- Ambient orbs (wow-factor) -->
+  <div class="hero-orbs" aria-hidden="true">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+  </div>
   <div class="hero-content">
     <p class="label hero-label">↓ scroll to explore</p>
     <h1 class="hero-name" aria-label="I'm Maurizio, but you can call me Mauri">
@@ -76,7 +81,43 @@ const line2 = ["but", "you", "can", "call", "me", "Mauri"];
     display: block;
   }
   .hero-line-2 {
-    color: var(--primary);
+    background: var(--grad-full);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Ambient orbs */
+  .hero-orbs {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(70px);
+    mix-blend-mode: screen;
+    opacity: 0;
+    animation: orbFloat 8s ease-in-out infinite;
+  }
+  .orb-1 {
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(102, 126, 234, 0.45) 0%, transparent 70%);
+    top: -10%; left: 5%;
+    animation-duration: 9s;
+  }
+  .orb-2 {
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(240, 147, 251, 0.35) 0%, transparent 70%);
+    bottom: 5%; right: 5%;
+    animation-duration: 11s;
+    animation-direction: reverse;
+  }
+  @keyframes orbFloat {
+    0%, 100% { opacity: 0.35; transform: translate(0, 0); }
+    50%       { opacity: 0.6;  transform: translate(-40px, -60px); }
   }
   .word {
     display: inline-block;

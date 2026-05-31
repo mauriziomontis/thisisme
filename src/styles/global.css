@@ -3,17 +3,37 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #0a0a0f;
-  --surface: #111118;
-  --border: #1e1e2e;
-  --primary: #4f8ef7;
-  --accent: #06d6a0;
-  --warm: #f97316;
-  --text: #e8e8f0;
-  --muted: #6b6b80;
+  /* ── Base ─────────────────────────────────────── */
+  --bg:            #0a0a0f;
+  --bg-warm:       #0f172a;   /* sezioni calde: about, creative */
+  --surface:       #111118;
+  --surface-glass: rgba(26, 26, 46, 0.55);  /* glassmorphism backdrop */
+  --border:        #1e1e2e;
+  --border-glow:   rgba(102, 126, 234, 0.3); /* card hover */
+
+  /* ── Primari (merge) ──────────────────────────── */
+  --primary:       #4f8ef7;   /* blu elettrico — circuiti, tech, nav */
+  --purple:        #667eea;   /* blu-viola — projects, hover, gradient */
+  --deep-purple:   #764ba2;   /* viola profondo — gradient 2° stop */
+
+  /* ── Accenti ──────────────────────────────────── */
+  --accent:        #06d6a0;   /* teal — highlight, hover */
+  --magenta:       #f093fb;   /* rosa magenta — creative, orb */
+  --warm:          #f97316;   /* arancio — music/suno banner */
+
+  /* ── Testo ────────────────────────────────────── */
+  --text:          #e8e8f0;
+  --muted:         #6b6b80;
+
+  /* ── Gradienti ────────────────────────────────── */
+  --grad-tech:     linear-gradient(135deg, #4f8ef7, #667eea);
+  --grad-creative: linear-gradient(135deg, #764ba2, #f093fb);
+  --grad-full:     linear-gradient(90deg, #4f8ef7 0%, #667eea 40%, #764ba2 70%, #f093fb 100%);
+
+  /* ── Font ─────────────────────────────────────── */
   --font-heading: 'Space Grotesk', sans-serif;
-  --font-body: 'Inter', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --font-body:    'Inter', sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
 }
 
 *, *::before, *::after {
