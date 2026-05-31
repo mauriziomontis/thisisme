@@ -1,10 +1,24 @@
 {
   "visited": [
-    { "name": "Italy",    "isoNum": 380, "flag": "🇮🇹" },
-    { "name": "France",   "isoNum": 250, "flag": "🇫🇷" },
-    { "name": "Germany",  "isoNum": 276, "flag": "🇩🇪" },
-    { "name": "Portugal", "isoNum": 620, "flag": "🇵🇹" },
-    { "name": "Japan",    "isoNum": 392, "flag": "🇯🇵" },
-    { "name": "USA",      "isoNum": 840, "flag": "🇺🇸" }
+    { "name": "Australia",        "isoNum": 36,  "flag": "🇦🇺" },
+    { "name": "Belgium",          "isoNum": 56,  "flag": "🇧🇪" },
+    { "name": "China",            "isoNum": 156, "flag": "🇨🇳" },
+    { "name": "Czech Republic",   "isoNum": 203, "flag": "🇨🇿" },
+    { "name": "Denmark",          "isoNum": 208, "flag": "🇩🇰" },
+    { "name": "England",          "isoNum": 826, "flag": "🏴󠁧󠁢󠁥󠁮󠁧󠁿" },
+    { "name": "France",           "isoNum": 250, "flag": "🇫🇷" },
+    { "name": "Germany",          "isoNum": 276, "flag": "🇩🇪" },
+    { "name": "Italy",            "isoNum": 380, "flag": "🇮🇹" },
+    { "name": "Japan",            "isoNum": 392, "flag": "🇯🇵" },
+    { "name": "Morocco",          "isoNum": 504, "flag": "🇲🇦" },
+    { "name": "Netherlands",      "isoNum": 528, "flag": "🇳🇱" },
+    { "name": "Norway",           "isoNum": 578, "flag": "🇳🇴" },
+    { "name": "San Marino",       "isoNum": 674, "flag": "🇸🇲" },
+    { "name": "South Africa",     "isoNum": 710, "flag": "🇿🇦" },
+    { "name": "Spain",            "isoNum": 724, "flag": "🇪🇸" },
+    { "name": "Sweden",           "isoNum": 752, "flag": "🇸🇪" },
+    { "name": "Switzerland",      "isoNum": 756, "flag": "🇨🇭" },
+    { "name": "Thailand",         "isoNum": 764, "flag": "🇹🇭" },
+    { "name": "USA",              "isoNum": 840, "flag": "🇺🇸" }
   ]
 }
