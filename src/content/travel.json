@@ -1,0 +1,10 @@
+{
+  "visited": [
+    { "name": "Italy",    "isoNum": 380, "flag": "🇮🇹" },
+    { "name": "France",   "isoNum": 250, "flag": "🇫🇷" },
+    { "name": "Germany",  "isoNum": 276, "flag": "🇩🇪" },
+    { "name": "Portugal", "isoNum": 620, "flag": "🇵🇹" },
+    { "name": "Japan",    "isoNum": 392, "flag": "🇯🇵" },
+    { "name": "USA",      "isoNum": 840, "flag": "🇺🇸" }
+  ]
+}

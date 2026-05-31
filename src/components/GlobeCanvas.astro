@@ -1,0 +1,253 @@
+---
+import travel from '../content/travel.json';
+const visitedIsos = travel.visited.map(c => c.isoNum);
+const BASE = import.meta.env.BASE_URL;   // '/thisisme/'
+---
+
+<div class="globe-layout">
+  <div class="globe-wrap">
+    <canvas
+      id="globe-canvas"
+      data-visited={JSON.stringify(visitedIsos)}
+      data-base={BASE}
+      aria-label="World map — visited countries highlighted"
+    ></canvas>
+    <p class="globe-hint">drag to rotate</p>
+  </div>
+
+  <div class="globe-legend">
+    <p class="legend-title label">Visited</p>
+    <ul class="legend-list">
+      {travel.visited.map(c => (
+        <li class="legend-item">
+          <span class="legend-flag">{c.flag}</span>
+          <span class="legend-name">{c.name}</span>
+        </li>
+      ))}
+    </ul>
+  </div>
+</div>
+
+<style>
+  .globe-layout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3rem;
+    flex-wrap: wrap;
+    padding: 1rem 0 2rem;
+  }
+
+  .globe-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    flex-shrink: 0;
+  }
+
+  #globe-canvas {
+    width: 440px;
+    height: 440px;
+    border-radius: 50%;
+    cursor: grab;
+    display: block;
+    /* Outer glow matching --border-glow / --purple */
+    box-shadow:
+      0 0 40px rgba(102, 126, 234, 0.18),
+      0 0 80px rgba(102, 126, 234, 0.06),
+      0 0  4px rgba(102, 126, 234, 0.30);
+    transition: box-shadow 0.3s ease;
+  }
+  #globe-canvas:hover {
+    box-shadow:
+      0 0 60px rgba(102, 126, 234, 0.28),
+      0 0 120px rgba(102, 126, 234, 0.10),
+      0 0   6px rgba(102, 126, 234, 0.40);
+  }
+  #globe-canvas:active { cursor: grabbing; }
+
+  .globe-hint {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    opacity: 0.6;
+  }
+
+  /* Legend */
+  .globe-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .legend-title { margin-bottom: 0.5rem; }
+  .legend-list { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--muted);
+    transition: color 0.2s;
+  }
+  .legend-item:hover { color: var(--text); }
+  .legend-flag { font-size: 1.2rem; line-height: 1; }
+  .legend-name { color: inherit; }
+
+  @media (max-width: 700px) {
+    #globe-canvas { width: 300px; height: 300px; }
+    .globe-layout { gap: 1.5rem; }
+    .legend-list { flex-direction: row; flex-wrap: wrap; gap: 0.75rem 1.5rem; }
+  }
+</style>
+
+<script>
+  import { geoOrthographic, geoPath, geoGraticule, type GeoPermissibleObjects } from 'd3-geo';
+  import { feature } from 'topojson-client';
+  import type { Topology, GeometryCollection } from 'topojson-specification';
+
+  const canvas = document.getElementById('globe-canvas') as HTMLCanvasElement;
+  if (!canvas) throw new Error('globe-canvas not found');
+
+  const ctx = canvas.getContext('2d')!;
+  const visitedSet = new Set<number>(JSON.parse(canvas.dataset.visited || '[]'));
+  const base       = canvas.dataset.base || '/';
+
+  // ── HiDPI / retina ────────────────────────────────────────────────────────
+  const SIZE = parseInt(canvas.style.width);
+  const dpr  = Math.min(window.devicePixelRatio || 1, 2);
+  canvas.width  = SIZE * dpr;
+  canvas.height = SIZE * dpr;
+  ctx.scale(dpr, dpr);
+
+  // ── D3 setup ───────────────────────────────────────────────────────────────
+  const projection = geoOrthographic()
+    .scale(SIZE / 2 - 4)
+    .translate([SIZE / 2, SIZE / 2])
+    .clipAngle(90);
+
+  const pathGen  = geoPath().projection(projection).context(ctx);
+  const graticule = geoGraticule()();
+
+  // ── Colors ────────────────────────────────────────────────────────────────
+  const C = {
+    bg:       '#0a0a0f',
+    surface:  'rgba(17,17,24,0.92)',
+    border:   'rgba(30,30,46,0.55)',
+    grid:     'rgba(30,30,46,0.35)',
+    visited:  'rgba(102,126,234,0.50)',
+    vBorder:  '#667eea',
+    vGlow:    '#667eea',
+    outline:  'rgba(102,126,234,0.22)',
+  };
+
+  // ── Load world topology ───────────────────────────────────────────────────
+  let countryFeatures: GeoJSON.Feature[] = [];
+
+  async function loadData() {
+    const topo = await fetch(`${base}data/countries-110m.json`).then(r => r.json()) as Topology;
+    const countries = feature(
+      topo,
+      topo.objects['countries'] as GeometryCollection
+    ) as GeoJSON.FeatureCollection;
+    countryFeatures = countries.features;
+  }
+
+  // ── Render ────────────────────────────────────────────────────────────────
+  function render() {
+    ctx.clearRect(0, 0, SIZE, SIZE);
+
+    // Sphere fill
+    ctx.beginPath();
+    pathGen({ type: 'Sphere' } as GeoPermissibleObjects);
+    ctx.fillStyle = C.bg;
+    ctx.fill();
+
+    // Graticule
+    ctx.beginPath();
+    pathGen(graticule as GeoPermissibleObjects);
+    ctx.strokeStyle = C.grid;
+    ctx.lineWidth = 0.35;
+    ctx.stroke();
+
+    // Countries
+    for (const f of countryFeatures) {
+      const isVisited = visitedSet.has(+(f.id ?? -1));
+      ctx.beginPath();
+      pathGen(f as GeoPermissibleObjects);
+
+      if (isVisited) {
+        ctx.fillStyle = C.visited;
+        ctx.fill();
+        ctx.save();
+        ctx.shadowColor = C.vGlow;
+        ctx.shadowBlur  = 10 * dpr;
+        ctx.strokeStyle = C.vBorder;
+        ctx.lineWidth   = 1.0;
+        ctx.stroke();
+        ctx.restore();
+      } else {
+        ctx.fillStyle   = C.surface;
+        ctx.fill();
+        ctx.strokeStyle = C.border;
+        ctx.lineWidth   = 0.3;
+        ctx.stroke();
+      }
+    }
+
+    // Sphere outline
+    ctx.beginPath();
+    pathGen({ type: 'Sphere' } as GeoPermissibleObjects);
+    ctx.strokeStyle = C.outline;
+    ctx.lineWidth   = 1.5;
+    ctx.stroke();
+  }
+
+  // ── Auto-rotation + drag ───────────────────────────────────────────────────
+  const rot = { lambda: -10, phi: 15 };
+  let dragging = false, lastX = 0, lastY = 0;
+  const AUTO = 0.13;
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function animate() {
+    if (!dragging && !reduced) rot.lambda += AUTO;
+    projection.rotate([rot.lambda, rot.phi]);
+    render();
+    requestAnimationFrame(animate);
+  }
+
+  // Mouse drag
+  canvas.addEventListener('mousedown', e => {
+    dragging = true; lastX = e.clientX; lastY = e.clientY;
+  });
+  canvas.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    rot.lambda += (e.clientX - lastX) * 0.4;
+    rot.phi    -= (e.clientY - lastY) * 0.3;
+    rot.phi     = Math.max(-75, Math.min(75, rot.phi));
+    lastX = e.clientX; lastY = e.clientY;
+  });
+  canvas.addEventListener('mouseup',    () => { dragging = false; });
+  canvas.addEventListener('mouseleave', () => { dragging = false; });
+
+  // Touch drag
+  canvas.addEventListener('touchstart', e => {
+    dragging = true;
+    lastX = e.touches[0].clientX;
+    lastY = e.touches[0].clientY;
+  }, { passive: true });
+  canvas.addEventListener('touchmove', e => {
+    if (!dragging) return;
+    rot.lambda += (e.touches[0].clientX - lastX) * 0.4;
+    rot.phi    -= (e.touches[0].clientY - lastY) * 0.3;
+    rot.phi     = Math.max(-75, Math.min(75, rot.phi));
+    lastX = e.touches[0].clientX;
+    lastY = e.touches[0].clientY;
+  }, { passive: true });
+  canvas.addEventListener('touchend', () => { dragging = false; });
+
+  // ── Bootstrap ─────────────────────────────────────────────────────────────
+  loadData().then(animate);
+</script>

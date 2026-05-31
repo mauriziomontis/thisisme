@@ -1,5 +1,6 @@
 ---
 import music from '../content/music.json';
+import GlobeCanvas from './GlobeCanvas.astro';
 
 const tabs = ['Music', 'Photography', 'Travel'];
 ---
@@ -78,15 +79,7 @@ const tabs = ['Music', 'Photography', 'Travel'];
 
     <!-- Travel -->
     <div class="tab-panel" data-panel="travel">
-      <div class="travel-grid">
-        {['Italy', 'Japan', 'Germany', 'France', 'Portugal', 'USA'].map((country) => (
-          <div class="travel-card glass-card reveal">
-            <span class="travel-flag">📍</span>
-            <span class="travel-name">{country}</span>
-          </div>
-        ))}
-      </div>
-      <p class="placeholder-hint reveal">Update the country list in Creative.astro</p>
+      <GlobeCanvas />
     </div>
 
   </div>
