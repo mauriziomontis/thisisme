@@ -3,6 +3,7 @@ import music from '../content/music.json';
 import GlobeCanvas from './GlobeCanvas.astro';
 
 const tabs = ['Music', 'Photography', 'Travel'];
+const BASE = import.meta.env.BASE_URL; // '/thisisme/'
 ---
 
 <section id="creative">
@@ -34,12 +35,9 @@ const tabs = ['Music', 'Photography', 'Travel'];
       </a>
 
       <div class="music-grid">
-        {music.tracks.map((track) => (
-          <a href={track.url} target="_blank" rel="noopener noreferrer" class="music-card reveal">
-            <div class="music-card-top">
-              <div class="music-icon-badge">♪</div>
-              <span class="track-year label">{track.year}</span>
-            </div>
+        {music.tracks.map((track) => {
+          const audioSrc = track.audioFile ? `${BASE}audio/${track.audioFile}` : '';
+          const waveform = (
             <div class="music-waveform" aria-hidden="true">
               <svg viewBox="0 0 300 60" preserveAspectRatio="none">
                 <defs>
@@ -52,11 +50,59 @@ const tabs = ['Music', 'Photography', 'Travel'];
                       fill="none" stroke="url(#waveGrad)" stroke-width="2.5" stroke-linecap="round"/>
               </svg>
             </div>
-            <p class="music-title">{track.title}</p>
-            <p class="music-desc">{track.description}</p>
-            <span class="label music-platform">{track.platform}</span>
-          </a>
-        ))}
+          );
+          return audioSrc ? (
+            /* ── Card con player audio ─────────────────────── */
+            <div class="music-card has-audio reveal" data-audio={audioSrc}>
+              <div class="music-card-top">
+                <div class="music-icon-badge">♪</div>
+                <div class="eq-bars" aria-hidden="true">
+                  <span class="eq-bar"></span>
+                  <span class="eq-bar"></span>
+                  <span class="eq-bar"></span>
+                  <span class="eq-bar"></span>
+                  <span class="eq-bar"></span>
+                </div>
+                <span class="track-year label">{track.year}</span>
+              </div>
+              {waveform}
+              <p class="music-title">{track.title}</p>
+              <p class="music-desc">{track.description}</p>
+              <span class="label music-platform">{track.platform}</span>
+              <div class="music-controls" role="group" aria-label="Player controls">
+                <button class="ctrl-btn ctrl-play" aria-label="Play" type="button">
+                  <svg width="13" height="13" viewBox="0 0 13 13" fill="currentColor" aria-hidden="true">
+                    <path d="M2.5 1.5l9 5-9 5z"/>
+                  </svg>
+                </button>
+                <button class="ctrl-btn ctrl-stop" aria-label="Stop" type="button">
+                  <svg width="11" height="11" viewBox="0 0 11 11" fill="currentColor" aria-hidden="true">
+                    <rect x="1" y="1" width="9" height="9" rx="1.5"/>
+                  </svg>
+                </button>
+                <label class="vol-wrap">
+                  <svg class="vol-icon" width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
+                    <path d="M2 5h2.5L8 2v10L4.5 9H2V5z"/>
+                    <path d="M9.5 4.5a3.5 3.5 0 010 5" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+                  </svg>
+                  <input class="vol-slider" type="range" min="0" max="1" step="0.05" value="0.7" aria-label="Volume"/>
+                </label>
+              </div>
+            </div>
+          ) : (
+            /* ── Card link esterno (Suno) ──────────────────── */
+            <a href={track.url} target="_blank" rel="noopener noreferrer" class="music-card reveal">
+              <div class="music-card-top">
+                <div class="music-icon-badge">♪</div>
+                <span class="track-year label">{track.year}</span>
+              </div>
+              {waveform}
+              <p class="music-title">{track.title}</p>
+              <p class="music-desc">{track.description}</p>
+              <span class="label music-platform">{track.platform}</span>
+            </a>
+          );
+        })}
         <div class="music-card reveal placeholder-card">
           <div class="music-icon-badge">+</div>
           <p class="music-title" style="margin-top:1rem">More coming soon</p>
@@ -177,6 +223,108 @@ const tabs = ['Music', 'Photography', 'Travel'];
   .music-title { font-family: var(--font-heading); font-weight: 600; font-size: 1rem; }
   .music-desc { font-size: 0.875rem; color: var(--muted); flex: 1; }
 
+  /* Equalizer bars (animated when playing) */
+  .eq-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 22px;
+    flex: 1;
+    padding: 0 0.5rem;
+  }
+  .eq-bar {
+    width: 3px;
+    height: 5px;
+    background: var(--grad-creative);
+    border-radius: 2px;
+    transition: height 0.15s;
+  }
+  .music-card.playing .eq-bar {
+    animation: eqBounce var(--dur, 0.8s) ease-in-out infinite alternate;
+  }
+  .eq-bar:nth-child(1) { --dur: 0.65s; animation-delay: 0.00s; }
+  .eq-bar:nth-child(2) { --dur: 0.90s; animation-delay: 0.12s; }
+  .eq-bar:nth-child(3) { --dur: 0.55s; animation-delay: 0.06s; }
+  .eq-bar:nth-child(4) { --dur: 1.00s; animation-delay: 0.20s; }
+  .eq-bar:nth-child(5) { --dur: 0.75s; animation-delay: 0.10s; }
+  @keyframes eqBounce {
+    from { height: 5px;  }
+    to   { height: 20px; }
+  }
+
+  /* Card playing state */
+  .music-card.has-audio {
+    cursor: pointer;
+  }
+  .music-card.playing {
+    border-color: var(--purple);
+    box-shadow: 0 12px 40px rgba(102,126,234,0.22),
+                0 0 0 1px rgba(102,126,234,0.4);
+  }
+
+  /* Player controls */
+  .music-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border);
+    margin-top: auto;
+  }
+  .ctrl-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid var(--border-glow);
+    background: transparent;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+  }
+  .ctrl-btn:hover { background: color-mix(in srgb, var(--purple) 15%, transparent); color: var(--purple); border-color: var(--purple); }
+  .music-card.playing .ctrl-play { background: var(--grad-tech); color: #fff; border-color: transparent; }
+
+  .vol-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-left: auto;
+    color: var(--muted);
+    cursor: default;
+  }
+  .vol-icon { flex-shrink: 0; }
+  .vol-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 72px;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+  .vol-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: var(--purple);
+    cursor: pointer;
+    box-shadow: 0 0 4px rgba(102,126,234,0.5);
+  }
+  .vol-slider::-moz-range-thumb {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: var(--purple);
+    border: none;
+    cursor: pointer;
+  }
+
   /* Photography */
   .photo-grid { columns: 3 200px; gap: 0.75rem; margin-bottom: 1.5rem; }
   .photo-placeholder {
@@ -257,5 +405,72 @@ const tabs = ['Music', 'Photography', 'Travel'];
       const panel = document.querySelector(`.tab-panel[data-panel="${(btn as HTMLElement).dataset.tab}"]`);
       panel?.classList.add('active');
     });
+  });
+
+  // ── Audio player ────────────────────────────────────────────────────────────
+  const ICON_PLAY  = `<svg width="13" height="13" viewBox="0 0 13 13" fill="currentColor" aria-hidden="true"><path d="M2.5 1.5l9 5-9 5z"/></svg>`;
+  const ICON_PAUSE = `<svg width="13" height="13" viewBox="0 0 13 13" fill="currentColor" aria-hidden="true"><rect x="2" y="2" width="3.5" height="9" rx="1"/><rect x="7.5" y="2" width="3.5" height="9" rx="1"/></svg>`;
+
+  let activeAudio: HTMLAudioElement | null = null;
+  let activeCard:  HTMLElement | null = null;
+
+  function setPlayUI(card: HTMLElement, playing: boolean) {
+    card.classList.toggle('playing', playing);
+    const btn = card.querySelector<HTMLButtonElement>('.ctrl-play');
+    if (!btn) return;
+    btn.innerHTML = playing ? ICON_PAUSE : ICON_PLAY;
+    btn.setAttribute('aria-label', playing ? 'Pause' : 'Play');
+  }
+
+  function stopAll() {
+    if (activeAudio) { activeAudio.pause(); activeAudio.currentTime = 0; }
+    if (activeCard)  setPlayUI(activeCard, false);
+    activeAudio = null;
+    activeCard  = null;
+  }
+
+  document.querySelectorAll<HTMLElement>('.music-card.has-audio').forEach(card => {
+    const src       = card.dataset.audio!;
+    const playBtn   = card.querySelector<HTMLButtonElement>('.ctrl-play')!;
+    const stopBtn   = card.querySelector<HTMLButtonElement>('.ctrl-stop')!;
+    const volSlider = card.querySelector<HTMLInputElement>('.vol-slider')!;
+
+    function togglePlay() {
+      // same card, audio paused → resume
+      if (activeCard === card && activeAudio?.paused) {
+        activeAudio.play();
+        setPlayUI(card, true);
+        return;
+      }
+      // same card, audio playing → pause
+      if (activeCard === card && activeAudio && !activeAudio.paused) {
+        activeAudio.pause();
+        setPlayUI(card, false);
+        return;
+      }
+      // different card → stop current, start new
+      stopAll();
+      const audio = new Audio(src);
+      audio.volume = parseFloat(volSlider.value);
+      audio.play().catch(e => console.warn('[Audio]', e));
+      audio.addEventListener('ended', stopAll);
+      activeAudio = audio;
+      activeCard  = card;
+      setPlayUI(card, true);
+    }
+
+    // play/pause button
+    playBtn.addEventListener('click', e => { e.stopPropagation(); togglePlay(); });
+    // stop button
+    stopBtn.addEventListener('click', e => { e.stopPropagation(); stopAll(); });
+    // volume slider — don't bubble to card click
+    volSlider.addEventListener('click',  e => e.stopPropagation());
+    volSlider.addEventListener('input',  () => {
+      if (activeCard === card && activeAudio) {
+        activeAudio.volume = parseFloat(volSlider.value);
+      }
+    });
+    // click on card body → toggle play
+    card.addEventListener('click', togglePlay);
   });
 </script>

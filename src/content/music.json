@@ -6,14 +6,16 @@
       "description": "AI-generated ambient piece",
       "url": "https://suno.com/@mauri_issio",
       "platform": "suno",
-      "year": 2025
+      "year": 2025,
+      "audioFile": ""
     },
     {
       "title": "Track Title 02",
       "description": "Experimental electronic composition",
       "url": "https://suno.com/@mauri_issio",
       "platform": "suno",
-      "year": 2025
+      "year": 2025,
+      "audioFile": ""
     }
   ]
 }
