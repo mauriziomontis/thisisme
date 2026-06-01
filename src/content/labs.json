@@ -1,0 +1,23 @@
+[
+  {
+    "title": "LightHOUSE web applicaton",
+    "description": "Webapp dedicated to EPICS IOCs management (with procServ and podman tools) and main IOCs information.",
+    "status": "wip",
+    "tags": "["Python", "containers", "procServer tool"]",
+    "link": ""
+  },
+  {
+    "title": "GameBook webapp",
+    "description": "Platform based on markdown files where authors can upload gambooks easily.",
+    "status": "concept",
+    "tags": "[]",
+    "link": ""
+  },
+  {
+    "title": "Seven Sins - EP",
+    "description": "Extended Play where each track explores human darkness through distinct genres, from Gothic Darkwave to Doom Metal.",
+    "status": "wip",
+    "tags": "["Music", "Songwriting"]",
+    "link": ""
+  }
+]

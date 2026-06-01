@@ -1,0 +1,123 @@
+---
+import labs from '../content/labs.json';
+---
+
+{labs.length > 0 && (
+  <section id="labs">
+    <div class="container">
+      <p class="label reveal">// labs</p>
+      <h2 class="section-title reveal">Experiments &<br/>Ideas</h2>
+      <div class="labs-list">
+        {labs.map((lab) => (
+          <div class="lab-item reveal">
+            <div class={`lab-dot ${lab.status}`}></div>
+            <div class="lab-content">
+              {lab.link
+                ? <a href={lab.link} target="_blank" rel="noopener noreferrer" class="lab-title">{lab.title}</a>
+                : <span class="lab-title">{lab.title}</span>
+              }
+              <p class="lab-desc">{lab.description}</p>
+              {lab.tags && lab.tags.length > 0 && (
+                <div class="lab-tags">
+                  {lab.tags.map(t => <span class="lab-tag">{t}</span>)}
+                </div>
+              )}
+            </div>
+            <span class={`lab-badge status-${lab.status}`}>{lab.status}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+)}
+
+<style>
+  #labs { border-top: 1px solid var(--border); }
+
+  .section-title { font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 700; margin: 1rem 0 2.5rem; }
+
+  .labs-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-width: 720px;
+  }
+
+  .lab-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 0.9rem 1.1rem;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-left: 3px solid color-mix(in srgb, var(--magenta) 50%, transparent);
+    transition: border-left-color 0.25s, background 0.25s;
+  }
+  .lab-item:hover {
+    background: color-mix(in srgb, var(--magenta) 4%, transparent);
+    border-left-color: var(--magenta);
+  }
+
+  .lab-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--magenta);
+    flex-shrink: 0;
+    margin-top: 6px;
+    transition: opacity 0.2s;
+  }
+  .lab-dot.concept,
+  .lab-dot.paused { opacity: 0.35; }
+
+  .lab-content { flex: 1; min-width: 0; }
+
+  .lab-title {
+    font-family: var(--font-heading);
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text);
+    text-decoration: none;
+    display: block;
+    margin-bottom: 0.3rem;
+    transition: color 0.2s;
+  }
+  a.lab-title:hover { color: var(--magenta); }
+
+  .lab-desc {
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.55;
+    margin: 0 0 0.5rem;
+  }
+
+  .lab-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+  }
+  .lab-tag {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--magenta) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--magenta) 25%, transparent);
+    color: var(--magenta);
+  }
+
+  .lab-badge {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 2px 8px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 4px;
+  }
+  .status-wip     { background: rgba(255,180,0,0.12);    color: #ffb400; }
+  .status-concept { background: rgba(102,126,234,0.12);  color: var(--primary); }
+  .status-paused  { background: rgba(255,255,255,0.06);  color: var(--muted); }
+</style>
