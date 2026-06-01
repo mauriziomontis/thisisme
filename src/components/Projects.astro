@@ -10,6 +10,7 @@ interface Repo {
 }
 
 import projectsConfig from '../content/projects.json';
+import githubCache from '../content/github-cache.json';
 const { featured } = projectsConfig;
 
 let repos: Repo[] = [];
@@ -20,6 +21,8 @@ try {
   const res = await fetch('https://api.github.com/users/mauriziomontis/repos?per_page=100&sort=updated', { headers });
   if (res.ok) repos = await res.json();
 } catch (_) {}
+
+if (repos.length === 0) repos = githubCache as Repo[];
 
 // Se la lista featured è vuota mostra placeholder, altrimenti filtra per nome
 const filtered = featured.length > 0

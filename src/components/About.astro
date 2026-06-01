@@ -1,5 +1,7 @@
 ---
 import travel from '../content/travel.json';
+import metrics from '../content/metrics.json';
+import RightNow from './RightNow.astro';
 
 const countriesVisited = travel.visited.length;
 
@@ -17,9 +19,11 @@ try {
 } catch (_) {}
 
 const counters = [
-  { value: 10,               label: 'years of experience', suffix: '+' },
-  { value: repoCount,        label: 'github projects',     suffix: ''  },
-  { value: countriesVisited, label: 'countries visited',   suffix: ''  },
+  { value: metrics.yearsOfExperience, label: 'years of experience', suffix: '+' },
+  { value: repoCount,                 label: 'github projects',     suffix: ''  },
+  { value: countriesVisited,          label: 'countries visited',   suffix: ''  },
+  { value: metrics.songsProduced,     label: 'songs produced',      suffix: ''  },
+  { value: metrics.coursesCompleted,  label: 'courses completed',   suffix: ''  },
 ];
 ---
 <section id="about">
@@ -46,6 +50,7 @@ const counters = [
             </div>
           ))}
         </div>
+        <RightNow />
       </div>
     </div>
   </div>

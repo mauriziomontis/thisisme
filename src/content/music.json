@@ -7,7 +7,7 @@
       "url": "#",
       "platform": "suno",
       "year": 2025,
-      "audioFile": "/audio/Shadow_Pangolins.mp3"
+      "audioFile": "Shadow_Pangolins.mp3"
     },
     {
       "title": "Passe-le au Vert",
@@ -15,7 +15,7 @@
       "url": "#",
       "platform": "suno",
       "year": 2026,
-      "audioFile": "/audio/Passe-le_au_Vert.mp3"
+      "audioFile": "Passe-le_au_Vert.mp3"
     }
   ]
 }

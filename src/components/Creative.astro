@@ -402,8 +402,11 @@ const BASE = import.meta.env.BASE_URL; // '/thisisme/'
       document.querySelectorAll('.tab-btn').forEach((b) => b.classList.remove('active'));
       document.querySelectorAll('.tab-panel').forEach((p) => p.classList.remove('active'));
       btn.classList.add('active');
-      const panel = document.querySelector(`.tab-panel[data-panel="${(btn as HTMLElement).dataset.tab}"]`);
+      const tab = (btn as HTMLElement).dataset.tab;
+      const panel = document.querySelector(`.tab-panel[data-panel="${tab}"]`);
       panel?.classList.add('active');
+      if (tab === 'travel') document.dispatchEvent(new CustomEvent('travel-tab-activated'));
+      document.dispatchEvent(new CustomEvent('creative-tab-changed', { detail: { tab } }));
     });
   });
 

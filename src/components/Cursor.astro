@@ -30,40 +30,48 @@
   body:not(.cursor-ready) #cursor-ring {
     opacity: 0;
   }
+  @media (hover: none) {
+    #cursor-dot,
+    #cursor-ring {
+      display: none;
+    }
+  }
 </style>
 
 <script>
-  const dot = document.getElementById('cursor-dot')!;
-  const ring = document.getElementById('cursor-ring')!;
-  let mx = 0, my = 0, rx = 0, ry = 0;
+  if (window.matchMedia('(hover: hover)').matches) {
+    const dot = document.getElementById('cursor-dot')!;
+    const ring = document.getElementById('cursor-ring')!;
+    let mx = 0, my = 0, rx = 0, ry = 0;
 
-  document.addEventListener('mousemove', (e) => {
-    mx = e.clientX;
-    my = e.clientY;
-    document.body.classList.add('cursor-ready');
-    dot.style.left = mx + 'px';
-    dot.style.top = my + 'px';
-  });
+    document.addEventListener('mousemove', (e) => {
+      mx = e.clientX;
+      my = e.clientY;
+      document.body.classList.add('cursor-ready');
+      dot.style.left = mx + 'px';
+      dot.style.top = my + 'px';
+    });
 
-  function lerp(a: number, b: number, t: number) { return a + (b - a) * t; }
+    function lerp(a: number, b: number, t: number) { return a + (b - a) * t; }
 
-  function tick() {
-    rx = lerp(rx, mx, 0.12);
-    ry = lerp(ry, my, 0.12);
-    ring.style.left = rx + 'px';
-    ring.style.top = ry + 'px';
-    requestAnimationFrame(tick);
+    function tick() {
+      rx = lerp(rx, mx, 0.12);
+      ry = lerp(ry, my, 0.12);
+      ring.style.left = rx + 'px';
+      ring.style.top = ry + 'px';
+      requestAnimationFrame(tick);
+    }
+    tick();
+
+    document.querySelectorAll('a, button, [data-magnetic]').forEach((el) => {
+      el.addEventListener('mouseenter', () => {
+        ring.style.transform = 'translate(-50%, -50%) scale(1.6)';
+        ring.style.borderColor = 'var(--accent)';
+      });
+      el.addEventListener('mouseleave', () => {
+        ring.style.transform = 'translate(-50%, -50%) scale(1)';
+        ring.style.borderColor = '';
+      });
+    });
   }
-  tick();
-
-  document.querySelectorAll('a, button, [data-magnetic]').forEach((el) => {
-    el.addEventListener('mouseenter', () => {
-      ring.style.transform = 'translate(-50%, -50%) scale(1.6)';
-      ring.style.borderColor = 'var(--accent)';
-    });
-    el.addEventListener('mouseleave', () => {
-      ring.style.transform = 'translate(-50%, -50%) scale(1)';
-      ring.style.borderColor = '';
-    });
-  });
 </script>

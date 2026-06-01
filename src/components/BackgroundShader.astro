@@ -1,14 +1,33 @@
 ---
 import bgs from '../content/backgrounds.json';
-const { sections, opacity } = bgs;
-const activeImages = Object.entries(sections).filter(([, url]) => url !== '');
+const BASE = import.meta.env.BASE_URL;
+const { opacity } = bgs;
+const sections = bgs.sections as Record<string, string>;
+const resolve = (url: string) => url.startsWith('/') ? BASE + url.slice(1) : url;
+
+// "creative" entry overrides music/photography if set
+const creativeOverride = sections.creative || '';
+const musicImg = creativeOverride || sections.music       || '';
+const photoImg = creativeOverride || sections.photography || '';
+// travel never gets a background
+
+const regularImages = (['hero', 'about', 'projects', 'courses', 'contact'] as const)
+  .filter(k => sections[k])
+  .map(k => ({ section: k, url: resolve(sections[k]) }));
+
+const creativeTabImages = [
+  ...(musicImg ? [{ section: 'creative-music',       url: resolve(musicImg) }] : []),
+  ...(photoImg ? [{ section: 'creative-photography', url: resolve(photoImg) }] : []),
+];
+
+const allImages = [...regularImages, ...creativeTabImages];
 ---
 
 <canvas id="bg-canvas" aria-hidden="true"></canvas>
 
-{activeImages.length > 0 && (
+{allImages.length > 0 && (
   <div id="bg-images" aria-hidden="true">
-    {activeImages.map(([section, url]) => (
+    {allImages.map(({ section, url }) => (
       <div
         class="bg-img"
         data-section={section}
@@ -200,11 +219,15 @@ const activeImages = Object.entries(sections).filter(([, url]) => url !== '');
     };
 
     const bgImgs = document.querySelectorAll<HTMLElement>('.bg-img');
+    // default: music is the first active tab in Creative
+    let currentCreativeTab: string | null = 'creative-music';
 
     function activate(id: string) {
       const [r, g, b] = sectionColors[id] ?? [0.31, 0.56, 0.97];
       gsap.to(color, { r, g, b, duration: 1.5, ease: 'power2.inOut' });
-      bgImgs.forEach(el => el.classList.toggle('active', el.dataset.section === id));
+      // creative section shows the per-tab image (null = travel → no image)
+      const target = id === 'creative' ? currentCreativeTab : id;
+      bgImgs.forEach(el => el.classList.toggle('active', el.dataset.section === target));
     }
 
     ['hero', 'about', 'projects', 'creative', 'courses', 'contact'].forEach(id => {
@@ -216,6 +239,19 @@ const activeImages = Object.entries(sections).filter(([, url]) => url !== '');
         end: 'bottom 40%',
         onEnter:     () => activate(id),
         onEnterBack: () => activate(id),
+      });
+    });
+
+    // Update bg when user switches tab inside Creative
+    document.addEventListener('creative-tab-changed', (e: Event) => {
+      const { tab } = (e as CustomEvent<{ tab: string }>).detail;
+      if (tab === 'music')           currentCreativeTab = 'creative-music';
+      else if (tab === 'photography') currentCreativeTab = 'creative-photography';
+      else                            currentCreativeTab = null; // travel — no bg
+      // Apply immediately (only visible if currently in creative section)
+      bgImgs.forEach(el => {
+        if (el.dataset.section?.startsWith('creative-'))
+          el.classList.toggle('active', el.dataset.section === currentCreativeTab);
       });
     });
   }

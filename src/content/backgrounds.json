@@ -1,11 +1,13 @@
 {
   "opacity": 0.18,
   "sections": {
-    "hero":     "",
-    "about":    "",
-    "projects": "",
-    "creative": "",
-    "courses":  "",
-    "contact":  ""
+    "hero":         "/images/hero_bg.png",
+    "about":        "/images/about_bg.png",
+    "projects":     "/images/project_bg.png",
+    "creative":     "",
+    "music":        "/images/music_bg.png",
+    "photography":  "/images/photography_bg.png",
+    "courses":      "/images/courses_bg.png",
+    "contact":      "/images/contact_bg.png"
   }
 }

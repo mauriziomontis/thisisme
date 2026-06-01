@@ -96,161 +96,162 @@ const BASE = import.meta.env.BASE_URL; // '/thisisme/'
 </style>
 
 <script>
-  import { geoOrthographic, geoPath, geoGraticule } from 'd3-geo';
-  import { feature } from 'topojson-client';
-
-  const canvas  = document.getElementById('globe-canvas') as HTMLCanvasElement;
+  const canvas = document.getElementById('globe-canvas') as HTMLCanvasElement;
   if (!canvas) throw new Error('globe-canvas missing');
 
-  const ctx         = canvas.getContext('2d')!;
-  const visitedSet  = new Set<number>(JSON.parse(canvas.dataset.visited || '[]'));
-  const topoUrl     = canvas.dataset.topoUrl!;
+  let initialized = false;
 
-  // ── Canvas size — hardcoded to match CSS, avoids getBoundingClientRect()=0
-  // when the tab panel is display:none at init time.
-  const CSS_SIZE  = window.innerWidth < 700 ? 300 : 440;
-  const dpr       = Math.min(window.devicePixelRatio || 1, 2);
-  canvas.width    = CSS_SIZE * dpr;
-  canvas.height   = CSS_SIZE * dpr;
-  ctx.scale(dpr, dpr);
+  async function initGlobe() {
+    if (initialized) return;
+    initialized = true;
 
-  const SIZE = CSS_SIZE; // working unit in CSS pixels
+    const [{ geoOrthographic, geoPath, geoGraticule }, { feature }] = await Promise.all([
+      import('d3-geo'),
+      import('topojson-client'),
+    ]);
 
-  // ── D3 setup ──────────────────────────────────────────────────────────────
-  const projection = geoOrthographic()
-    .scale(SIZE / 2 - 3)
-    .translate([SIZE / 2, SIZE / 2])
-    .clipAngle(90)
-    .rotate([-10, 15]);
+    const ctx        = canvas.getContext('2d')!;
+    const visitedSet = new Set<number>(JSON.parse(canvas.dataset.visited || '[]'));
+    const topoUrl    = canvas.dataset.topoUrl!;
 
-  const pathGen   = geoPath(projection, ctx);
-  const graticule = geoGraticule()();
+    // Canvas size hardcoded to avoid getBoundingClientRect()=0 when panel is display:none
+    const CSS_SIZE = window.innerWidth < 700 ? 300 : 440;
+    const dpr      = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width   = CSS_SIZE * dpr;
+    canvas.height  = CSS_SIZE * dpr;
+    ctx.scale(dpr, dpr);
 
-  // ── Colors ────────────────────────────────────────────────────────────────
-  const BG      = '#0a0a0f';
-  const SURFACE = 'rgba(17,17,24,0.94)';
-  const GRID    = 'rgba(30,30,46,0.40)';
-  const BORDER  = 'rgba(30,30,46,0.60)';
-  const V_FILL  = 'rgba(102,126,234,0.48)';
-  const V_LINE  = '#667eea';
-  const OUTLINE = 'rgba(102,126,234,0.22)';
+    const SIZE = CSS_SIZE;
 
-  // ── Rotation state ────────────────────────────────────────────────────────
-  let lambda = -10, phi = 15;
-  let dragging = false, lastX = 0, lastY = 0;
-  const AUTO    = 0.13;
-  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const projection = geoOrthographic()
+      .scale(SIZE / 2 - 3)
+      .translate([SIZE / 2, SIZE / 2])
+      .clipAngle(90)
+      .rotate([-10, 15]);
 
-  // ── Country features ──────────────────────────────────────────────────────
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let features: any[] = [];
+    const pathGen   = geoPath(projection, ctx);
+    const graticule = geoGraticule()();
 
-  // ── Render ────────────────────────────────────────────────────────────────
-  function render() {
-    projection.rotate([lambda, phi]);
-    ctx.clearRect(0, 0, SIZE, SIZE);
+    const BG      = '#0a0a0f';
+    const SURFACE = 'rgba(17,17,24,0.94)';
+    const GRID    = 'rgba(30,30,46,0.40)';
+    const BORDER  = 'rgba(30,30,46,0.60)';
+    const V_FILL  = 'rgba(102,126,234,0.48)';
+    const V_LINE  = '#667eea';
+    const OUTLINE = 'rgba(102,126,234,0.22)';
 
-    // Sphere fill
-    ctx.beginPath();
-    // @ts-ignore — Sphere is a valid d3-geo object
-    pathGen({ type: 'Sphere' });
-    ctx.fillStyle = BG;
-    ctx.fill();
+    let lambda = -10, phi = 15;
+    let dragging = false, lastX = 0, lastY = 0;
+    const AUTO    = 0.13;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    // Graticule
-    ctx.beginPath();
-    // @ts-ignore
-    pathGen(graticule);
-    ctx.strokeStyle = GRID;
-    ctx.lineWidth   = 0.4;
-    ctx.stroke();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let features: any[] = [];
 
-    // Countries
-    for (const f of features) {
-      const id        = typeof f.id === 'string' ? parseInt(f.id, 10) : Number(f.id);
-      const isVisited = visitedSet.has(id);
+    function render() {
+      projection.rotate([lambda, phi]);
+      ctx.clearRect(0, 0, SIZE, SIZE);
 
       ctx.beginPath();
       // @ts-ignore
-      pathGen(f);
+      pathGen({ type: 'Sphere' });
+      ctx.fillStyle = BG;
+      ctx.fill();
 
-      if (isVisited) {
-        ctx.fillStyle = V_FILL;
-        ctx.fill();
-        ctx.save();
-        ctx.shadowColor = V_LINE;
-        ctx.shadowBlur  = 8 * dpr;
-        ctx.strokeStyle = V_LINE;
-        ctx.lineWidth   = 1.0;
-        ctx.stroke();
-        ctx.restore();
-      } else {
-        ctx.fillStyle   = SURFACE;
-        ctx.fill();
-        ctx.strokeStyle = BORDER;
-        ctx.lineWidth   = 0.3;
-        ctx.stroke();
+      ctx.beginPath();
+      // @ts-ignore
+      pathGen(graticule);
+      ctx.strokeStyle = GRID;
+      ctx.lineWidth   = 0.4;
+      ctx.stroke();
+
+      for (const f of features) {
+        const id        = typeof f.id === 'string' ? parseInt(f.id, 10) : Number(f.id);
+        const isVisited = visitedSet.has(id);
+
+        ctx.beginPath();
+        // @ts-ignore
+        pathGen(f);
+
+        if (isVisited) {
+          ctx.fillStyle = V_FILL;
+          ctx.fill();
+          ctx.save();
+          ctx.shadowColor = V_LINE;
+          ctx.shadowBlur  = 8 * dpr;
+          ctx.strokeStyle = V_LINE;
+          ctx.lineWidth   = 1.0;
+          ctx.stroke();
+          ctx.restore();
+        } else {
+          ctx.fillStyle   = SURFACE;
+          ctx.fill();
+          ctx.strokeStyle = BORDER;
+          ctx.lineWidth   = 0.3;
+          ctx.stroke();
+        }
       }
+
+      ctx.beginPath();
+      // @ts-ignore
+      pathGen({ type: 'Sphere' });
+      ctx.strokeStyle = OUTLINE;
+      ctx.lineWidth   = 1.5;
+      ctx.stroke();
     }
 
-    // Sphere outline
-    ctx.beginPath();
-    // @ts-ignore
-    pathGen({ type: 'Sphere' });
-    ctx.strokeStyle = OUTLINE;
-    ctx.lineWidth   = 1.5;
-    ctx.stroke();
+    function animate() {
+      if (!dragging && !reduced) lambda += AUTO;
+      render();
+      requestAnimationFrame(animate);
+    }
+
+    canvas.addEventListener('mousedown', e => {
+      dragging = true; lastX = e.clientX; lastY = e.clientY;
+    });
+    window.addEventListener('mousemove', e => {
+      if (!dragging) return;
+      lambda += (e.clientX - lastX) * 0.45;
+      phi    -= (e.clientY - lastY) * 0.30;
+      phi     = Math.max(-80, Math.min(80, phi));
+      lastX   = e.clientX; lastY = e.clientY;
+    });
+    window.addEventListener('mouseup', () => { dragging = false; });
+
+    canvas.addEventListener('touchstart', e => {
+      dragging = true;
+      lastX = e.touches[0].clientX;
+      lastY = e.touches[0].clientY;
+    }, { passive: true });
+    window.addEventListener('touchmove', e => {
+      if (!dragging) return;
+      lambda += (e.touches[0].clientX - lastX) * 0.45;
+      phi    -= (e.touches[0].clientY - lastY) * 0.30;
+      phi     = Math.max(-80, Math.min(80, phi));
+      lastX   = e.touches[0].clientX;
+      lastY   = e.touches[0].clientY;
+    }, { passive: true });
+    window.addEventListener('touchend', () => { dragging = false; });
+
+    fetch(topoUrl)
+      .then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status} fetching ${topoUrl}`);
+        return r.json();
+      })
+      .then(topo => {
+        const obj = topo.objects?.countries ?? topo.objects?.land;
+        if (!obj) throw new Error('No countries object in topology');
+        const geojson = feature(topo, obj) as GeoJSON.FeatureCollection;
+        features = geojson.features;
+      })
+      .catch(err => console.error('[GlobeCanvas] topology load failed:', err))
+      .finally(() => animate());
   }
 
-  // ── Animation loop ────────────────────────────────────────────────────────
-  function animate() {
-    if (!dragging && !reduced) lambda += AUTO;
-    render();
-    requestAnimationFrame(animate);
-  }
+  // Init when travel tab is first activated
+  document.addEventListener('travel-tab-activated', initGlobe, { once: true });
 
-  // ── Drag — mouse ──────────────────────────────────────────────────────────
-  canvas.addEventListener('mousedown', e => {
-    dragging = true; lastX = e.clientX; lastY = e.clientY;
-  });
-  window.addEventListener('mousemove', e => {
-    if (!dragging) return;
-    lambda += (e.clientX - lastX) * 0.45;
-    phi    -= (e.clientY - lastY) * 0.30;
-    phi     = Math.max(-80, Math.min(80, phi));
-    lastX   = e.clientX; lastY = e.clientY;
-  });
-  window.addEventListener('mouseup', () => { dragging = false; });
-
-  // ── Drag — touch ──────────────────────────────────────────────────────────
-  canvas.addEventListener('touchstart', e => {
-    dragging = true;
-    lastX = e.touches[0].clientX;
-    lastY = e.touches[0].clientY;
-  }, { passive: true });
-  window.addEventListener('touchmove', e => {
-    if (!dragging) return;
-    lambda += (e.touches[0].clientX - lastX) * 0.45;
-    phi    -= (e.touches[0].clientY - lastY) * 0.30;
-    phi     = Math.max(-80, Math.min(80, phi));
-    lastX   = e.touches[0].clientX;
-    lastY   = e.touches[0].clientY;
-  }, { passive: true });
-  window.addEventListener('touchend', () => { dragging = false; });
-
-  // ── Load topology and start ───────────────────────────────────────────────
-  fetch(topoUrl)
-    .then(r => {
-      if (!r.ok) throw new Error(`HTTP ${r.status} fetching ${topoUrl}`);
-      return r.json();
-    })
-    .then(topo => {
-      // world-atlas countries-110m.json uses 'countries' as the object key
-      const obj = topo.objects?.countries ?? topo.objects?.land;
-      if (!obj) throw new Error('No countries object in topology');
-      const geojson = feature(topo, obj) as GeoJSON.FeatureCollection;
-      features = geojson.features;
-    })
-    .catch(err => console.error('[GlobeCanvas] topology load failed:', err))
-    .finally(() => animate());
+  // Also init if travel tab is already active on load
+  const panel = canvas.closest('[data-panel="travel"]');
+  if (panel?.classList.contains('active')) initGlobe();
 </script>

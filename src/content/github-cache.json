@@ -1,0 +1,56 @@
+[
+  {
+    "id": 1,
+    "name": "docs-IT",
+    "description": "Documentazione tecnica in italiano per sviluppatori",
+    "html_url": "https://github.com/mauriziomontis/docs-IT",
+    "stargazers_count": 0,
+    "language": "Markdown",
+    "topics": ["documentation", "italian"]
+  },
+  {
+    "id": 2,
+    "name": "awesome-claude-skills",
+    "description": "A curated collection of Claude Code skills and plugins",
+    "html_url": "https://github.com/mauriziomontis/awesome-claude-skills",
+    "stargazers_count": 0,
+    "language": "Markdown",
+    "topics": ["claude", "ai", "skills"]
+  },
+  {
+    "id": 3,
+    "name": "epics-sumsh-gr1",
+    "description": "Epic summarizer and group management tool",
+    "html_url": "https://github.com/mauriziomontis/epics-sumsh-gr1",
+    "stargazers_count": 0,
+    "language": "TypeScript",
+    "topics": []
+  },
+  {
+    "id": 4,
+    "name": "epics-school-docs",
+    "description": "School documentation and resources for EPICS projects",
+    "html_url": "https://github.com/mauriziomontis/epics-school-docs",
+    "stargazers_count": 0,
+    "language": "Markdown",
+    "topics": ["education", "documentation"]
+  },
+  {
+    "id": 5,
+    "name": "my-impro-toolkit",
+    "description": "Toolkit for theatrical improvisation — games, formats, warm-ups",
+    "html_url": "https://github.com/mauriziomontis/my-impro-toolkit",
+    "stargazers_count": 0,
+    "language": "JavaScript",
+    "topics": ["improv", "theater"]
+  },
+  {
+    "id": 6,
+    "name": "suno-ai-assistant",
+    "description": "AI assistant for generating and managing music with Suno",
+    "html_url": "https://github.com/mauriziomontis/suno-ai-assistant",
+    "stargazers_count": 0,
+    "language": "Python",
+    "topics": ["ai", "music", "suno"]
+  }
+]
