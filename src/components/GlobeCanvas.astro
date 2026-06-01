@@ -1,6 +1,26 @@
 ---
 import travel from '../content/travel.json';
+import metrics from '../content/metrics.json';
 const BASE = import.meta.env.BASE_URL; // '/thisisme/'
+
+const countriesVisited  = travel.visited.length;
+const continentsVisited = new Set(travel.visited.map(c => c.continent)).size;
+const kmFormatted = metrics.kmTravelled >= 1000
+  ? `${Math.round(metrics.kmTravelled / 1000)}k`
+  : metrics.kmTravelled.toString();
+
+const earthLaps   = Math.round(metrics.kmTravelled / 40075 * 10) / 10;
+const daysInFlight = Math.round(metrics.kmTravelled / 900 / 24);
+
+// 1 colonna ogni 10 paesi, max 3
+const legendCols = Math.min(Math.ceil(travel.visited.length / 10), 3);
+
+const travelStats = [
+  { value: countriesVisited,  label: 'countries'  },
+  { value: continentsVisited, label: 'continents' },
+  { value: metrics.flights,   label: 'flights'    },
+  { value: kmFormatted,       label: 'km', sub: `${earthLaps}× Earth · ${daysInFlight} days in flight` },
+];
 ---
 
 <div class="globe-layout">
@@ -15,8 +35,17 @@ const BASE = import.meta.env.BASE_URL; // '/thisisme/'
   </div>
 
   <div class="globe-legend">
-    <p class="legend-title label">Visited ({travel.visited.length})</p>
-    <ul class="legend-list">
+    <div class="travel-stats">
+      {travelStats.map(s => (
+        <div class="travel-stat">
+          <span class="ts-value">{s.value}</span>
+          <span class="ts-label">{s.label}</span>
+          {s.sub && <span class="ts-sub">{s.sub}</span>}
+        </div>
+      ))}
+    </div>
+    <p class="legend-title label">Visited ({countriesVisited})</p>
+    <ul class="legend-list" style={`column-count: ${legendCols}`}>
       {travel.visited.map(c => (
         <li class="legend-item">
           <span class="legend-flag">{c.flag}</span>
@@ -74,8 +103,54 @@ const BASE = import.meta.env.BASE_URL; // '/thisisme/'
     flex-direction: column;
     gap: 0.5rem;
   }
+  .travel-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+  }
+  .travel-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0.5rem 0.85rem;
+    background: var(--surface-glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border-glow);
+    border-radius: 10px;
+    min-width: 64px;
+    transition: border-color 0.25s, transform 0.25s;
+  }
+  .travel-stat:hover { border-color: var(--purple); transform: translateY(-2px); }
+  .ts-value {
+    font-family: var(--font-heading);
+    font-size: 1.4rem;
+    font-weight: 700;
+    line-height: 1;
+    background: var(--grad-tech);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .ts-label {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-top: 0.25rem;
+  }
+  .ts-sub {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    color: var(--muted);
+    opacity: 0.65;
+    margin-top: 0.3rem;
+    white-space: nowrap;
+  }
   .legend-title { margin-bottom: 0.5rem; }
-  .legend-list { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+  .legend-list { list-style: none; column-gap: 2rem; }
   .legend-item {
     display: flex;
     align-items: center;
@@ -84,6 +159,8 @@ const BASE = import.meta.env.BASE_URL; // '/thisisme/'
     font-size: 0.85rem;
     color: var(--muted);
     transition: color 0.2s;
+    break-inside: avoid;
+    padding-bottom: 0.6rem;
   }
   .legend-item:hover { color: var(--text); }
   .legend-flag { font-size: 1.2rem; line-height: 1; }
@@ -91,7 +168,7 @@ const BASE = import.meta.env.BASE_URL; // '/thisisme/'
   @media (max-width: 700px) {
     #globe-canvas { width: 300px; height: 300px; }
     .globe-layout { gap: 1.5rem; }
-    .legend-list { flex-direction: row; flex-wrap: wrap; gap: 0.75rem 1.5rem; }
+    .legend-list { column-count: 2 !important; }
   }
 </style>
 
