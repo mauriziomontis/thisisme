@@ -1,0 +1,14 @@
+{
+  "photos": [
+    { "src": "IMG_001.jpg", "alt": "Sunset over a city skyline with church tower silhouettes" },
+    { "src": "IMG_002.jpg", "alt": "Stone water basin with wooden ladles at a Japanese shrine" },
+    { "src": "IMG_003.jpg", "alt": "Cat sleeping on an ancient marble column capital" },
+    { "src": "IMG_004.jpg", "alt": "Colorful folded silk fabrics stacked at a market stall" },
+    { "src": "IMG_005.jpg", "alt": "Ancient olive tree in a rocky Mediterranean landscape" },
+    { "src": "IMG_006.jpg", "alt": "Castel Sant Angelo and Ponte Sant Angelo reflected in the Tiber, Rome" },
+    { "src": "IMG_007.jpg", "alt": "Dramatic sunset over a marina with sailboat masts silhouetted" },
+    { "src": "IMG_008.jpg", "alt": "Primitive trail sign among red rock formations at Arches National Park" },
+    { "src": "IMG_009.jpg", "alt": "Ceiling installation of hundreds of colourful Murano glass flowers" },
+    { "src": "IMG_010.jpg", "alt": "Blue sky with white clouds and a power line crossing the frame" }
+  ]
+}
