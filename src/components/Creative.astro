@@ -15,10 +15,10 @@ const photos = await Promise.all(
     try {
       const meta = await sharp(filePath).metadata();
       const tall = (meta.height ?? 0) > (meta.width ?? 0);
-      return { ...photo, tall };
+      return { ...photo, tall, width: meta.width ?? 0, height: meta.height ?? 0 };
     } catch (e) {
       console.warn(`[Creative.astro] Could not read dimensions for ${photo.src}: ${(e as Error).message}`);
-      return { ...photo, tall: false };
+      return { ...photo, tall: false, width: 0, height: 0 };
     }
   })
 );
@@ -132,6 +132,8 @@ const photos = await Promise.all(
             <img
               src={`${BASE}images/${photo.src}`}
               alt={photo.alt}
+              width={photo.width}
+              height={photo.height}
               loading="lazy"
               decoding="async"
             />
@@ -345,17 +347,23 @@ const photos = await Promise.all(
   /* Photography */
   .photo-grid { columns: 3 200px; gap: 0.75rem; margin-bottom: 1.5rem; }
   .photo-placeholder {
-    background: var(--surface);
-    border: 1px solid var(--border);
     border-radius: 8px;
     height: 180px;
-    display: flex;
-    align-items: flex-end;
-    padding: 0.75rem;
+    overflow: hidden;
+    display: block;
     margin-bottom: 0.75rem;
     break-inside: avoid;
   }
   .photo-placeholder.tall { height: 260px; }
+  .photo-placeholder img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    transition: transform 0.4s ease;
+  }
+  .photo-placeholder:hover img { transform: scale(1.05); }
 
   /* Travel */
   .travel-grid { display: flex; flex-wrap: wrap; gap: 0.875rem; margin-bottom: 1.5rem; justify-content: center; }
