@@ -15,7 +15,7 @@ const photos = await Promise.all(
     try {
       const meta = await sharp(filePath).metadata();
       const tall = (meta.height ?? 0) > (meta.width ?? 0);
-      return { ...photo, tall, width: meta.width ?? 0, height: meta.height ?? 0 };
+      return { ...photo, tall, width: meta.width, height: meta.height };
     } catch (e) {
       console.warn(`[Creative.astro] Could not read dimensions for ${photo.src}: ${(e as Error).message}`);
       return { ...photo, tall: false, width: undefined, height: undefined };
