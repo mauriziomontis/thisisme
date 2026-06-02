@@ -3,17 +3,23 @@ import music from '../content/music.json';
 import photosData from '../content/photos.json';
 import GlobeCanvas from './GlobeCanvas.astro';
 import sharp from 'sharp';
-import { join } from 'path';
+import { join } from 'node:path';
 
 const tabs = ['Travel', 'Music', 'Photography'];
 const BASE = import.meta.env.BASE_URL; // '/thisisme/'
 
+// process.cwd() is the Astro project root at build time
 const photos = await Promise.all(
   photosData.photos.map(async (photo) => {
     const filePath = join(process.cwd(), 'public', 'images', photo.src);
-    const meta = await sharp(filePath).metadata();
-    const tall = (meta.height ?? 0) > (meta.width ?? 0);
-    return { ...photo, tall };
+    try {
+      const meta = await sharp(filePath).metadata();
+      const tall = (meta.height ?? 0) > (meta.width ?? 0);
+      return { ...photo, tall };
+    } catch (e) {
+      console.warn(`[Creative.astro] Could not read dimensions for ${photo.src}: ${(e as Error).message}`);
+      return { ...photo, tall: false };
+    }
   })
 );
 ---
