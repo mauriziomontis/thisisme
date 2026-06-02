@@ -18,7 +18,7 @@ const photos = await Promise.all(
       return { ...photo, tall, width: meta.width ?? 0, height: meta.height ?? 0 };
     } catch (e) {
       console.warn(`[Creative.astro] Could not read dimensions for ${photo.src}: ${(e as Error).message}`);
-      return { ...photo, tall: false, width: 0, height: 0 };
+      return { ...photo, tall: false, width: undefined, height: undefined };
     }
   })
 );
@@ -362,6 +362,7 @@ const photos = await Promise.all(
     object-position: center;
     display: block;
     transition: transform 0.4s ease;
+    will-change: transform;
   }
   .photo-placeholder:hover img { transform: scale(1.05); }
 
