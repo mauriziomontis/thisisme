@@ -76,6 +76,30 @@ const { exploring, listening, thoughts } = data;
     color: var(--muted);
     font-style: italic;
   }
+
+  @media (max-width: 768px) {
+    .right-now { max-width: 100%; }
+    .rn-row {
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+    .rn-label { min-width: 85px; }
+  }
+
+  @media (max-width: 480px) {
+    .rn-row {
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+    .rn-label { min-width: unset; }
+    .rn-tags { gap: 0.3rem; }
+    .rn-tag {
+      font-size: 0.72rem;
+      padding: 3px 8px;
+    }
+    .rn-val,
+    .rn-thought { font-size: 0.8rem; }
+  }
 </style>
 
 <script>

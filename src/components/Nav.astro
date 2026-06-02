@@ -61,8 +61,48 @@
   }
   .nav-links a:hover { color: var(--text); }
 
-  @media (max-width: 640px) {
-    .nav-links { display: none; }
+  /* ── Tablet: tighten gap so links don't crowd the logo ── */
+  @media (max-width: 768px) {
+    .nav-links {
+      gap: 1.2rem;
+    }
+    .nav-inner {
+      padding: 0 1.25rem;
+    }
+  }
+
+  /* ── Mobile: replace hidden links with a horizontally-scrollable strip ── */
+  @media (max-width: 480px) {
+    .nav-inner {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+      padding: 0 1rem;
+    }
+    .nav-links {
+      display: flex;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;        /* Firefox */
+      gap: 0;
+      width: 100%;
+      padding-bottom: 0.25rem;
+    }
+    .nav-links::-webkit-scrollbar {
+      display: none;                /* Chrome/Safari */
+    }
+    .nav-links li {
+      flex-shrink: 0;
+    }
+    .nav-links a {
+      display: block;
+      padding: 0.5rem 0.9rem;       /* min 44px touch target height via line-height */
+      font-size: 0.8rem;
+    }
+    #main-nav {
+      padding: 0.75rem 0;
+    }
   }
 </style>
 

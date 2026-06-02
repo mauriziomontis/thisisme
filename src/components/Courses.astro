@@ -45,6 +45,34 @@ import courses from '../content/courses.json';
   .course-desc { font-size: 0.875rem; color: var(--muted); }
   .course-right { display: flex; align-items: center; gap: 1rem; color: var(--muted); flex-shrink: 0; }
   svg { transition: color 0.2s; }
+
+  @media (max-width: 768px) {
+    #courses { padding: 3rem 0; }
+    .section-title { margin-bottom: 2rem; }
+    .courses-list { max-width: 100%; }
+    .course-item {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 1.25rem 0;
+    }
+    /* Disable the indent-on-hover animation that doesn't work on touch */
+    .course-item:hover { padding-left: 0; }
+    .course-right {
+      flex-shrink: 1;
+      gap: 0.75rem;
+    }
+    .course-title { font-size: 1rem; }
+  }
+
+  @media (max-width: 480px) {
+    .section-title { margin-bottom: 1.5rem; }
+    .course-item { padding: 1rem 0; }
+    .course-title { font-size: 0.95rem; }
+    .course-desc { font-size: 0.82rem; }
+    .course-right { gap: 0.5rem; }
+    .course-right svg { width: 18px; height: 18px; }
+  }
 </style>
 
 <script>

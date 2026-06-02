@@ -145,6 +145,53 @@ const line2 = ["but", "you", "can", "call", "me", "Mauri"];
     80%  { transform: translateY(16px); opacity: 0; }
     100% { transform: translateY(0); opacity: 0; }
   }
+
+  /* ── Tablet ── */
+  @media (max-width: 768px) {
+    .orb-1 {
+      width: 320px;
+      height: 320px;
+    }
+    .orb-2 {
+      width: 260px;
+      height: 260px;
+    }
+    .hero-content {
+      padding: 0 1.5rem;
+    }
+    .scroll-indicator {
+      margin-top: 2rem;
+    }
+  }
+
+  /* ── Mobile ── */
+  @media (max-width: 480px) {
+    .orb-1 {
+      width: 220px;
+      height: 220px;
+      left: -5%;            /* keep it partially off-screen, no horizontal overflow */
+    }
+    .orb-2 {
+      width: 180px;
+      height: 180px;
+      right: -5%;
+    }
+    .hero-content {
+      padding: 0 1.25rem;
+    }
+    .hero-name {
+      /* clamp already handles font-size, but ensure no overflow */
+      word-break: break-word;
+    }
+    .hero-sub {
+      /* allow graceful wrapping on very narrow viewports */
+      letter-spacing: 0.04em;
+      line-height: 1.6;
+    }
+    .scroll-indicator {
+      margin-top: 1.5rem;
+    }
+  }
 </style>
 
 <script>

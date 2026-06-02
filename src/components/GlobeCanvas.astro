@@ -165,10 +165,31 @@ const travelStats = [
   .legend-item:hover { color: var(--text); }
   .legend-flag { font-size: 1.2rem; line-height: 1; }
 
-  @media (max-width: 700px) {
+  /* ── Tablet (≤768px) ───────────────────────────────────────────────── */
+  @media (max-width: 768px) {
     #globe-canvas { width: 300px; height: 300px; }
     .globe-layout { gap: 1.5rem; }
     .legend-list { column-count: 2 !important; }
+    .ts-sub { white-space: normal; }
+  }
+
+  /* ── Mobile (≤480px) ───────────────────────────────────────────────── */
+  @media (max-width: 480px) {
+    /* Globe shrinks to fit narrow viewport; never wider than 100% */
+    #globe-canvas {
+      width: min(260px, calc(100vw - 2rem));
+      height: min(260px, calc(100vw - 2rem));
+    }
+    .globe-layout { gap: 1rem; padding: 0.5rem 0 1.5rem; }
+
+    /* Stats wrap tighter */
+    .travel-stats { gap: 0.4rem; }
+    .travel-stat { padding: 0.4rem 0.65rem; min-width: 56px; }
+    .ts-value { font-size: 1.2rem; }
+
+    /* Legend: single column on very small screens */
+    .legend-list { column-count: 1 !important; }
+    .legend-item { font-size: 0.8rem; padding-bottom: 0.4rem; }
   }
 </style>
 

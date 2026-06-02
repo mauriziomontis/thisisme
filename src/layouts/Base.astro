@@ -25,6 +25,18 @@ const {
     <link rel="icon" type="image/svg+xml" href="/thisisme/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <style>
+      /* Prevent iOS/Android from auto-inflating font sizes */
+      html {
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+      }
+      /* Restore default cursor on touch devices (no custom cursor JS on mobile) */
+      @media (pointer: coarse) {
+        body { cursor: auto; }
+        a, button, [role="button"], input, label { cursor: pointer; }
+      }
+    </style>
   </head>
   <body>
     <slot />
