@@ -127,9 +127,14 @@ const photos = await Promise.all(
     <!-- Photography -->
     <div class="tab-panel" data-panel="photography">
       <div class="photo-grid">
-        {[1,2,3,4,5,6].map((i) => (
-          <div class={`photo-placeholder reveal ${i % 3 === 0 ? 'tall' : ''}`}>
-            <span class="label">photo {i}</span>
+        {photos.map((photo) => (
+          <div class={`photo-placeholder reveal${photo.tall ? ' tall' : ''}`}>
+            <img
+              src={`${BASE}images/${photo.src}`}
+              alt={photo.alt}
+              loading="lazy"
+              decoding="async"
+            />
           </div>
         ))}
       </div>
