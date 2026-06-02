@@ -1,14 +1,14 @@
 [
   {
-    "title": "Course Title 01",
-    "description": "Brief description of the course content and topics covered.",
-    "url": "#",
+    "title": "EPICS Summer School 2024",
+    "description": "Two-week training course dedicated to study and in-depth understand control systems in particle accelerators and other scientific facilities.",
+    "url": "https://epics-summer-school.github.io/epics-school-docs/2024-08-02-welcome-to-the-epics-summer-school/",
     "year": 2024
   },
   {
-    "title": "Course Title 02",
-    "description": "Brief description of the course content and topics covered.",
-    "url": "#",
-    "year": 2023
+    "title": "Introduction to EPICS",
+    "description": "Brief introduction to EPICS framework, used to design and implement distributed control systems in particle accelerators. Presented ad Università dell'Aquila (Italy)",
+    "url": "",
+    "year": 2022
   }
 ]
