@@ -2,6 +2,22 @@
   "sunoProfile": "https://suno.com/@mauri_issio",
   "tracks": [
     {
+      "title": "Lovely Strings",
+      "description": "00s soft-rock - instrumental",
+      "url": "#",
+      "platform": "suno",
+      "year": 2025,
+      "audioFile": "Lovely_strings.mp3"
+    },
+    {
+      "title": "Empty Roads",
+      "description": "Single piano motif - instrumental",
+      "url": "#",
+      "platform": "suno",
+      "year": 2025,
+      "audioFile": "Empty_roads.mp3"
+    },
+    {
       "title": "Shadow Pangolins (影子穿山甲)",
       "description": "Theme song for IPAC 2025",
       "url": "#",
