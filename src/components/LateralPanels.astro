@@ -58,9 +58,10 @@
 
   if (!ctxL || !ctxR) throw new Error('Canvas 2D context unavailable');
 
-  const DPR = window.devicePixelRatio || 1;
+  let DPR = window.devicePixelRatio || 1;
 
   function resizePanels() {
+    DPR = window.devicePixelRatio || 1;
     const PW = panelL.offsetWidth;
     const PH = window.innerHeight;
     [cvsL, cvsR].forEach(cvs => {
@@ -72,6 +73,7 @@
     [ctxL, ctxR].forEach(ctx => {
       ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
     });
+    computeTraceLengths();
   }
 
   function debounce(fn: () => void, ms: number) {
@@ -117,6 +119,7 @@
   const SECTION_PHASES = [0, 0.24, 0.44, 0.58, 0.72, 0.85, 1.0];
 
   function scrollToPhysics(s: number): number {
+    if (s >= 1) return 1.0;
     const idx = Math.min(Math.floor(s * N_SECTIONS), N_SECTIONS - 1);
     const local = (s * N_SECTIONS) - idx;
     const from = SECTION_PHASES[idx];
@@ -523,6 +526,14 @@
   const signalOffsets: number[] = PCB_TRACES.map((_, i) => i * 0.25);
   const TRACE_VARIATIONS = [1.0, 0.85, 1.15, 0.70];
 
+  let traceLengthsCache: number[] = [];
+
+  function computeTraceLengths() {
+    const PW = cvsR.width / DPR;
+    const PH = cvsR.height / DPR;
+    traceLengthsCache = PCB_TRACES.map(trace => getTraceLength(trace, PW, PH));
+  }
+
   function getTraceLength(trace: TracePoint[], PW: number, PH: number): number {
     let len = 0;
     for (let i = 1; i < trace.length; i++) {
@@ -533,8 +544,8 @@
     return len;
   }
 
-  function getPosAlongTrace(trace: TracePoint[], t: number, PW: number, PH: number): { x: number; y: number } {
-    const totalLen = getTraceLength(trace, PW, PH);
+  function getPosAlongTrace(trace: TracePoint[], t: number, PW: number, PH: number, precomputedLen?: number): { x: number; y: number } {
+    const totalLen = precomputedLen ?? getTraceLength(trace, PW, PH);
     let target = t * totalLen;
     for (let i = 1; i < trace.length; i++) {
       const dx = (trace[i].rx - trace[i-1].rx) * PW;
@@ -603,9 +614,11 @@
   }
 
   function renderLeft(phase: number, dt: number) {
-    ctxL.clearRect(0, 0, cvsL.width, cvsL.height);
+    const PW = cvsL.width / DPR;
+    const PH = cvsL.height / DPR;
+    ctxL.clearRect(0, 0, PW, PH);
     ctxL.fillStyle = 'rgba(3, 5, 13, 0.92)';
-    ctxL.fillRect(0, 0, cvsL.width, cvsL.height);
+    ctxL.fillRect(0, 0, PW, PH);
 
     drawStars(phase);
     drawProtoAtoms(phase);
@@ -619,9 +632,9 @@
     const accent = paletteRight(phase);
     const alphaHex = (v: number) => Math.round(clamp(v, 0, 1) * 255).toString(16).padStart(2, '0');
 
-    ctxR.clearRect(0, 0, cvsR.width, cvsR.height);
+    ctxR.clearRect(0, 0, PW, PH);
     ctxR.fillStyle = 'rgba(3, 8, 5, 0.97)';
-    ctxR.fillRect(0, 0, cvsR.width, cvsR.height);
+    ctxR.fillRect(0, 0, PW, PH);
 
     // Grid
     ctxR.strokeStyle = '#091508';
@@ -679,7 +692,8 @@
     const speed = 1 + currentPhase * 2.5;
     PCB_TRACES.forEach((trace, ti) => {
       signalOffsets[ti] = (signalOffsets[ti] + 0.00007 * speed * TRACE_VARIATIONS[ti]) % 1;
-      const pos = getPosAlongTrace(trace, signalOffsets[ti], PW, PH);
+      const cachedLen = traceLengthsCache[ti];
+      const pos = getPosAlongTrace(trace, signalOffsets[ti], PW, PH, cachedLen);
 
       ctxR.beginPath();
       ctxR.arc(pos.x, pos.y, 5, 0, Math.PI * 2);
