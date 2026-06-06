@@ -3,9 +3,6 @@
 <div class="panel panel-left" id="panelL">
   <canvas id="cvsL"></canvas>
 </div>
-<div class="panel panel-right" id="panelR">
-  <canvas id="cvsR"></canvas>
-</div>
 
 <style>
   .panel {
@@ -23,12 +20,6 @@
   .panel-left {
     left: 0;
     border-right: 0.5px solid #0d1a2a;
-    mask-image: linear-gradient(to bottom, transparent 0%, black 6%, black 94%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 6%, black 94%, transparent 100%);
-  }
-  .panel-right {
-    right: 0;
-    border-left: 0.5px solid #0d1a2a;
     mask-image: linear-gradient(to bottom, transparent 0%, black 6%, black 94%, transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 6%, black 94%, transparent 100%);
   }
@@ -50,13 +41,10 @@
 
 <script>
   const panelL = document.getElementById('panelL') as HTMLDivElement;
-  const panelR = document.getElementById('panelR') as HTMLDivElement;
   const cvsL = document.getElementById('cvsL') as HTMLCanvasElement;
-  const cvsR = document.getElementById('cvsR') as HTMLCanvasElement;
   const ctxL = cvsL.getContext('2d');
-  const ctxR = cvsR.getContext('2d');
 
-  if (!ctxL || !ctxR) throw new Error('Canvas 2D context unavailable');
+  if (!ctxL) throw new Error('Canvas 2D context unavailable');
 
   let DPR = window.devicePixelRatio || 1;
 
@@ -64,16 +52,11 @@
     DPR = window.devicePixelRatio || 1;
     const PW = panelL.offsetWidth;
     const PH = window.innerHeight;
-    [cvsL, cvsR].forEach(cvs => {
-      cvs.width = PW * DPR;
-      cvs.height = PH * DPR;
-      cvs.style.width = PW + 'px';
-      cvs.style.height = PH + 'px';
-    });
-    [ctxL, ctxR].forEach(ctx => {
-      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    });
-    computeTraceLengths();
+    cvsL.width = PW * DPR;
+    cvsL.height = PH * DPR;
+    cvsL.style.width = PW + 'px';
+    cvsL.style.height = PH + 'px';
+    ctxL.setTransform(DPR, 0, 0, DPR, 0, 0);
   }
 
   function debounce(fn: () => void, ms: number) {
@@ -98,10 +81,6 @@
     if (phase < 0.4) return lerpHex('#aaaaee', '#44aaff', phase / 0.4);
     if (phase < 0.7) return lerpHex('#44aaff', '#00ffcc', (phase - 0.4) / 0.3);
     return lerpHex('#00ffcc', '#44ffaa', (phase - 0.7) / 0.3);
-  }
-
-  function paletteRight(phase: number): string {
-    return lerpHex('#00cc55', '#44ffaa', clamp((phase - 0.3) / 0.7, 0, 1));
   }
 
   window.addEventListener('resize', debounce(resizePanels, 200));
@@ -202,14 +181,12 @@
 
   const TRAIL_STEPS = 38;
 
-  // electronAngles[atomIdx][orbitIdx][electronIdx] = current angle
   const electronAngles: number[][][] = ATOM_DEFS.map(atom =>
     atom.orbits.map(orbit => Array.from({ length: orbit.eCount }, (_, i) =>
       (i / orbit.eCount) * Math.PI * 2
     ))
   );
 
-  // electronTrails[atomIdx][orbitIdx][electronIdx] = [{x,y}, ...]
   const electronTrails: { x: number; y: number }[][][][] = ATOM_DEFS.map(atom =>
     atom.orbits.map(orbit => Array.from({ length: orbit.eCount }, () => []))
   );
@@ -388,7 +365,6 @@
       const cy = atom.ry * PH;
       const pulse = 1 + 0.15 * Math.sin(T * 1.5 + atom.protons * 0.4);
 
-      // Nucleus glow
       const grd = ctxL.createRadialGradient(cx, cy, 0, cx, cy, atom.nucleusR * 2.6 * pulse);
       grd.addColorStop(0, accent + alphaHex(atomAlpha * 0.27));
       grd.addColorStop(1, accent + '00');
@@ -397,7 +373,6 @@
       ctxL.fillStyle = grd;
       ctxL.fill();
 
-      // Nucleons
       const total = Math.min(atom.protons + atom.neutrons, 14);
       ctxL.globalAlpha = atomAlpha;
       for (let i = 0; i < total; i++) {
@@ -410,16 +385,13 @@
         ctxL.fill();
       }
 
-      // Core
       ctxL.beginPath();
       ctxL.arc(cx, cy, atom.nucleusR * 0.5, 0, Math.PI * 2);
       ctxL.fillStyle = accent;
       ctxL.fill();
       ctxL.globalAlpha = 1;
 
-      // Orbits + electrons
       atom.orbits.forEach((orbit, oi) => {
-        // Orbit ellipse
         ctxL.save();
         ctxL.translate(cx, cy);
         ctxL.rotate(orbit.tilt);
@@ -430,12 +402,10 @@
         ctxL.stroke();
         ctxL.restore();
 
-        // Electrons
         for (let ei = 0; ei < orbit.eCount; ei++) {
           const trail = electronTrails[ai][oi][ei];
           if (trail.length < 2) continue;
 
-          // Outer trail
           ctxL.beginPath();
           ctxL.moveTo(trail[0].x, trail[0].y);
           for (let t = 1; t < trail.length; t++) ctxL.lineTo(trail[t].x, trail[t].y);
@@ -443,7 +413,6 @@
           ctxL.lineWidth = 1.4 + oi * 0.2;
           ctxL.stroke();
 
-          // Inner bright trail
           const innerLen = Math.max(2, Math.floor(trail.length * 0.35));
           ctxL.beginPath();
           ctxL.moveTo(trail[0].x, trail[0].y);
@@ -452,7 +421,6 @@
           ctxL.lineWidth = 0.55;
           ctxL.stroke();
 
-          // Electron dot
           ctxL.beginPath();
           ctxL.arc(trail[0].x, trail[0].y, 2.1 + oi * 0.25, 0, Math.PI * 2);
           ctxL.fillStyle = accent;
@@ -461,7 +429,6 @@
           ctxL.globalAlpha = 1;
         }
 
-        // Quantum jump flash
         if (atom.orbits.length > 1) {
           const js = jumpStates[ai][oi];
           if (js.jumping && js.jumpT < 1) {
@@ -495,73 +462,6 @@
   ];
 
   const bondParticleT: number[] = BONDS.map((_, i) => i * 0.2);
-
-  // ── PCB right panel ───────────────────────────────────────────
-  interface TracePoint { rx: number; ry: number; }
-
-  const PCB_TRACES: TracePoint[][] = [
-    [{ rx: 0.30, ry: 0.02 }, { rx: 0.30, ry: 0.18 }, { rx: 0.15, ry: 0.18 },
-     { rx: 0.15, ry: 0.35 }, { rx: 0.30, ry: 0.35 }, { rx: 0.30, ry: 0.52 },
-     { rx: 0.15, ry: 0.52 }, { rx: 0.15, ry: 0.68 }, { rx: 0.30, ry: 0.68 },
-     { rx: 0.30, ry: 0.98 }],
-    [{ rx: 0.70, ry: 0.02 }, { rx: 0.70, ry: 0.22 }, { rx: 0.85, ry: 0.22 },
-     { rx: 0.85, ry: 0.45 }, { rx: 0.70, ry: 0.45 }, { rx: 0.70, ry: 0.60 },
-     { rx: 0.85, ry: 0.60 }, { rx: 0.85, ry: 0.78 }, { rx: 0.70, ry: 0.78 },
-     { rx: 0.70, ry: 0.98 }],
-    [{ rx: 0.50, ry: 0.05 }, { rx: 0.50, ry: 0.28 }, { rx: 0.65, ry: 0.28 },
-     { rx: 0.65, ry: 0.50 }, { rx: 0.35, ry: 0.50 }, { rx: 0.35, ry: 0.72 },
-     { rx: 0.50, ry: 0.72 }, { rx: 0.50, ry: 0.95 }],
-    [{ rx: 0.08, ry: 0.08 }, { rx: 0.92, ry: 0.08 }, { rx: 0.92, ry: 0.40 },
-     { rx: 0.08, ry: 0.40 }, { rx: 0.08, ry: 0.60 }, { rx: 0.92, ry: 0.60 },
-     { rx: 0.92, ry: 0.92 }, { rx: 0.08, ry: 0.92 }],
-  ];
-
-  const PCB_VIAS: { rx: number; ry: number }[] = [
-    { rx: 0.30, ry: 0.18 }, { rx: 0.30, ry: 0.35 }, { rx: 0.30, ry: 0.52 },
-    { rx: 0.70, ry: 0.22 }, { rx: 0.70, ry: 0.45 }, { rx: 0.70, ry: 0.60 },
-    { rx: 0.50, ry: 0.28 }, { rx: 0.50, ry: 0.72 }, { rx: 0.65, ry: 0.50 },
-    { rx: 0.35, ry: 0.50 }, { rx: 0.92, ry: 0.40 }, { rx: 0.08, ry: 0.60 },
-  ];
-
-  const signalOffsets: number[] = PCB_TRACES.map((_, i) => i * 0.25);
-  const TRACE_VARIATIONS = [1.0, 0.85, 1.15, 0.70];
-
-  let traceLengthsCache: number[] = [];
-
-  function computeTraceLengths() {
-    const PW = cvsR.width / DPR;
-    const PH = cvsR.height / DPR;
-    traceLengthsCache = PCB_TRACES.map(trace => getTraceLength(trace, PW, PH));
-  }
-
-  function getTraceLength(trace: TracePoint[], PW: number, PH: number): number {
-    let len = 0;
-    for (let i = 1; i < trace.length; i++) {
-      const dx = (trace[i].rx - trace[i-1].rx) * PW;
-      const dy = (trace[i].ry - trace[i-1].ry) * PH;
-      len += Math.sqrt(dx * dx + dy * dy);
-    }
-    return len;
-  }
-
-  function getPosAlongTrace(trace: TracePoint[], t: number, PW: number, PH: number, precomputedLen?: number): { x: number; y: number } {
-    const totalLen = precomputedLen ?? getTraceLength(trace, PW, PH);
-    let target = t * totalLen;
-    for (let i = 1; i < trace.length; i++) {
-      const dx = (trace[i].rx - trace[i-1].rx) * PW;
-      const dy = (trace[i].ry - trace[i-1].ry) * PH;
-      const segLen = Math.sqrt(dx * dx + dy * dy);
-      if (target <= segLen) {
-        const frac = segLen > 0 ? target / segLen : 0;
-        return {
-          x: (trace[i-1].rx + (trace[i].rx - trace[i-1].rx) * frac) * PW,
-          y: (trace[i-1].ry + (trace[i].ry - trace[i-1].ry) * frac) * PH,
-        };
-      }
-      target -= segLen;
-    }
-    return { x: trace[trace.length - 1].rx * PW, y: trace[trace.length - 1].ry * PH };
-  }
 
   function drawBonds(phase: number) {
     const bondAlpha = ease(clamp((phase - 0.70) / 0.22, 0, 1));
@@ -602,10 +502,8 @@
 
       bondParticleT[bi] = (bondParticleT[bi] + 0.004) % 1;
       const pt = bondParticleT[bi];
-      const px = x1 + dx * pt;
-      const py = y1 + dy * pt;
       ctxL.beginPath();
-      ctxL.arc(px, py, 2, 0, Math.PI * 2);
+      ctxL.arc(x1 + dx * pt, y1 + dy * pt, 2, 0, Math.PI * 2);
       ctxL.fillStyle = accent;
       ctxL.globalAlpha = bondAlpha;
       ctxL.fill();
@@ -626,92 +524,6 @@
     drawBonds(phase);
   }
 
-  function renderRight(phase: number) {
-    const PW = cvsR.width / DPR;
-    const PH = cvsR.height / DPR;
-    const accent = paletteRight(phase);
-    const alphaHex = (v: number) => Math.round(clamp(v, 0, 1) * 255).toString(16).padStart(2, '0');
-
-    ctxR.clearRect(0, 0, PW, PH);
-    ctxR.fillStyle = 'rgba(3, 8, 5, 0.97)';
-    ctxR.fillRect(0, 0, PW, PH);
-
-    // Grid
-    ctxR.strokeStyle = '#091508';
-    ctxR.lineWidth = 0.25;
-    for (let x = 0; x < PW; x += 10) {
-      ctxR.beginPath(); ctxR.moveTo(x, 0); ctxR.lineTo(x, PH); ctxR.stroke();
-    }
-    for (let y = 0; y < PH; y += 10) {
-      ctxR.beginPath(); ctxR.moveTo(0, y); ctxR.lineTo(PW, y); ctxR.stroke();
-    }
-
-    // Traces
-    ctxR.lineWidth = 1;
-    PCB_TRACES.forEach(trace => {
-      ctxR.beginPath();
-      ctxR.moveTo(trace[0].rx * PW, trace[0].ry * PH);
-      for (let i = 1; i < trace.length; i++) {
-        ctxR.lineTo(trace[i].rx * PW, trace[i].ry * PH);
-      }
-      ctxR.strokeStyle = accent + alphaHex(0.6);
-      ctxR.stroke();
-    });
-
-    // Vias
-    PCB_VIAS.forEach(via => {
-      ctxR.beginPath();
-      ctxR.arc(via.rx * PW, via.ry * PH, 2.8, 0, Math.PI * 2);
-      ctxR.strokeStyle = accent;
-      ctxR.lineWidth = 1;
-      ctxR.stroke();
-      ctxR.beginPath();
-      ctxR.arc(via.rx * PW, via.ry * PH, 1, 0, Math.PI * 2);
-      ctxR.fillStyle = accent + 'aa';
-      ctxR.fill();
-    });
-
-    // IC component
-    const icX = PW * 0.20, icY = PH * 0.42, icW = PW * 0.60, icH = PH * 0.10;
-    ctxR.strokeStyle = accent + 'aa';
-    ctxR.lineWidth = 1;
-    ctxR.strokeRect(icX, icY, icW, icH);
-    ctxR.fillStyle = accent + '55';
-    ctxR.font = `${Math.max(6, Math.floor(PW * 0.08))}px monospace`;
-    ctxR.fillText('ATmega', icX + icW * 0.15, icY + icH * 0.65);
-
-    // Capacitors
-    const capW = PW * 0.08, capH = PH * 0.04;
-    [[0.05, 0.20], [0.05, 0.75]].forEach(([crx, cry]) => {
-      ctxR.strokeStyle = accent + '88';
-      ctxR.lineWidth = 0.8;
-      ctxR.strokeRect(crx * PW - capW / 2, cry * PH - capH / 2, capW, capH);
-    });
-
-    // Signal dots
-    const speed = 1 + currentPhase * 2.5;
-    PCB_TRACES.forEach((trace, ti) => {
-      signalOffsets[ti] = (signalOffsets[ti] + 0.00007 * speed * TRACE_VARIATIONS[ti]) % 1;
-      const cachedLen = traceLengthsCache[ti];
-      const pos = getPosAlongTrace(trace, signalOffsets[ti], PW, PH, cachedLen);
-
-      ctxR.beginPath();
-      ctxR.arc(pos.x, pos.y, 5, 0, Math.PI * 2);
-      ctxR.fillStyle = accent + '38';
-      ctxR.fill();
-
-      ctxR.beginPath();
-      ctxR.arc(pos.x, pos.y, 2.2, 0, Math.PI * 2);
-      ctxR.fillStyle = accent;
-      ctxR.fill();
-
-      ctxR.beginPath();
-      ctxR.arc(pos.x, pos.y, 0.8, 0, Math.PI * 2);
-      ctxR.fillStyle = '#ffffff';
-      ctxR.fill();
-    });
-  }
-
   function frame(timestamp: number) {
     if (panelL.offsetWidth === 0) { requestAnimationFrame(frame); return; }
     if (!lastTime) lastTime = timestamp;
@@ -724,7 +536,6 @@
 
     updateElectrons(dt);
     renderLeft(currentPhase, dt);
-    renderRight(currentPhase);
 
     requestAnimationFrame(frame);
   }
@@ -732,10 +543,8 @@
   requestAnimationFrame(() => {
     resizePanels();
     requestAnimationFrame(frame);
-    // Fade in after first frame
     requestAnimationFrame(() => {
       panelL.classList.add('ready');
-      panelR.classList.add('ready');
     });
   });
 </script>
