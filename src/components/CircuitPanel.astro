@@ -201,9 +201,14 @@
   .cf.cf-fast  { animation-duration: 1.3s; animation-name: flowRight; }
   .cf.cf-rev   { animation-direction: reverse; }
 
-  /* Hide on narrow screens where the panel overlaps content */
-  @media (max-width: 1100px) {
-    #circuit-panel { display: none; }
+  @media (max-width: 1099px) {
+    #circuit-panel { width: 48px; }
+  }
+  @media (max-width: 767px) {
+    #circuit-panel { width: 32px; }
+  }
+  @media (max-width: 479px) {
+    #circuit-panel { width: 24px; }
   }
 
   @media (prefers-reduced-motion: reduce) {
