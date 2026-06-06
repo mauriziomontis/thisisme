@@ -145,6 +145,19 @@
     trailSpeed: 0.0022 + rng(i * 2.3) * 0.0012,
   }));
 
+  // ── Proto-atoms ───────────────────────────────────────────────
+  interface ProtoAtom {
+    x: number;
+    y: number;
+    r: number;
+  }
+
+  const protoAtoms: ProtoAtom[] = Array.from({ length: 6 }, (_, i) => ({
+    x: 0.15 + rng(i * 11.3) * 0.7,
+    y: 0.05 + rng(i * 13.7) * 0.9,
+    r: 3 + rng(i * 17.1) * 5,
+  }));
+
   function drawStars(phase: number) {
     const PW = cvsL.width / DPR;
     const PH = cvsL.height / DPR;
@@ -195,12 +208,54 @@
     });
   }
 
+  function drawProtoAtoms(phase: number) {
+    const visibleCount = lerp(0, 6, ease(clamp((phase - 0.18) * 5, 0, 1)));
+    const alpha = Math.max(0, Math.sin(clamp((phase - 0.18) / 0.52, 0, 1) * Math.PI));
+    if (alpha < 0.01) return;
+
+    const accent = paletteLeft(phase);
+    const PW = cvsL.width / DPR;
+    const PH = cvsL.height / DPR;
+
+    protoAtoms.slice(0, Math.ceil(visibleCount)).forEach((pa, i) => {
+      const itemAlpha = alpha * Math.min(1, visibleCount - i);
+      if (itemAlpha < 0.01) return;
+
+      const cx = pa.x * PW;
+      const cy = pa.y * PH;
+      const pulse = 1 + 0.2 * Math.sin(T * 2 + i * 1.1);
+      const r = pa.r * pulse;
+
+      const alphaHex = (v: number) => Math.round(clamp(v, 0, 1) * 255).toString(16).padStart(2, '0');
+
+      const grd = ctxL.createRadialGradient(cx, cy, 0, cx, cy, r * 3);
+      grd.addColorStop(0, accent + alphaHex(itemAlpha * 0.31));
+      grd.addColorStop(1, accent + '00');
+      ctxL.beginPath();
+      ctxL.arc(cx, cy, r * 3, 0, Math.PI * 2);
+      ctxL.fillStyle = grd;
+      ctxL.fill();
+
+      ctxL.beginPath();
+      ctxL.arc(cx, cy, r, 0, Math.PI * 2);
+      ctxL.fillStyle = accent + alphaHex(itemAlpha * 0.63);
+      ctxL.fill();
+
+      ctxL.beginPath();
+      ctxL.ellipse(cx, cy, r * 2.5, r * 1.5, T * 0.3 + i, 0, Math.PI * 2);
+      ctxL.strokeStyle = accent + alphaHex(itemAlpha * 0.24);
+      ctxL.lineWidth = 0.7;
+      ctxL.stroke();
+    });
+  }
+
   function renderLeft(phase: number, _dt: number) {
     ctxL.clearRect(0, 0, cvsL.width, cvsL.height);
     ctxL.fillStyle = 'rgba(3, 5, 13, 0.92)';
     ctxL.fillRect(0, 0, cvsL.width, cvsL.height);
 
     drawStars(phase);
+    drawProtoAtoms(phase);
   }
 
   function renderRight(_phase: number) {
