@@ -158,6 +158,75 @@
     r: 3 + rng(i * 17.1) * 5,
   }));
 
+  // ── Atoms ─────────────────────────────────────────────────────
+  interface OrbitDef {
+    a: number; b: number; tilt: number; eCount: number; dir: number;
+  }
+  interface AtomDef {
+    rx: number; ry: number; el: string;
+    protons: number; neutrons: number; nucleusR: number;
+    orbits: OrbitDef[];
+  }
+
+  const ATOM_DEFS: AtomDef[] = [
+    { rx: 0.42, ry: 0.10, el: 'H',  protons: 1,  neutrons: 0,  nucleusR: 4,
+      orbits: [{ a: 22, b: 16, tilt: 0.3,  eCount: 1, dir:  1 }] },
+    { rx: 0.62, ry: 0.22, el: 'He', protons: 2,  neutrons: 2,  nucleusR: 5,
+      orbits: [{ a: 20, b: 15, tilt: -0.5, eCount: 2, dir: -1 }] },
+    { rx: 0.30, ry: 0.36, el: 'C',  protons: 6,  neutrons: 6,  nucleusR: 7,
+      orbits: [{ a: 18, b: 13, tilt: 0.2,  eCount: 2, dir:  1 },
+               { a: 32, b: 24, tilt: -0.6, eCount: 4, dir: -1 }] },
+    { rx: 0.66, ry: 0.50, el: 'O',  protons: 8,  neutrons: 8,  nucleusR: 7,
+      orbits: [{ a: 17, b: 12, tilt: 0.5,  eCount: 2, dir:  1 },
+               { a: 30, b: 22, tilt: -0.3, eCount: 6, dir: -1 }] },
+    { rx: 0.35, ry: 0.65, el: 'N',  protons: 7,  neutrons: 7,  nucleusR: 6.5,
+      orbits: [{ a: 16, b: 12, tilt: -0.3, eCount: 2, dir: -1 },
+               { a: 28, b: 20, tilt: 0.5,  eCount: 5, dir:  1 }] },
+    { rx: 0.55, ry: 0.80, el: 'Na', protons: 11, neutrons: 12, nucleusR: 8,
+      orbits: [{ a: 15, b: 11, tilt: 0.1,  eCount: 2, dir:  1 },
+               { a: 26, b: 19, tilt: -0.5, eCount: 8, dir: -1 },
+               { a: 40, b: 29, tilt: 0.4,  eCount: 1, dir:  1 }] },
+  ];
+
+  const TRAIL_STEPS = 38;
+
+  // electronAngles[atomIdx][orbitIdx][electronIdx] = current angle
+  const electronAngles: number[][][] = ATOM_DEFS.map(atom =>
+    atom.orbits.map(orbit => Array.from({ length: orbit.eCount }, (_, i) =>
+      (i / orbit.eCount) * Math.PI * 2
+    ))
+  );
+
+  // electronTrails[atomIdx][orbitIdx][electronIdx] = [{x,y}, ...]
+  const electronTrails: { x: number; y: number }[][][][] = ATOM_DEFS.map(atom =>
+    atom.orbits.map(orbit => Array.from({ length: orbit.eCount }, () => []))
+  );
+
+  function updateElectrons(dt: number) {
+    const PW = cvsL.width / DPR;
+    const PH = cvsL.height / DPR;
+
+    ATOM_DEFS.forEach((atom, ai) => {
+      const cx = atom.rx * PW;
+      const cy = atom.ry * PH;
+      atom.orbits.forEach((orbit, oi) => {
+        const speed = (0.8 + oi * 0.3) * orbit.dir;
+        for (let ei = 0; ei < orbit.eCount; ei++) {
+          electronAngles[ai][oi][ei] += dt * speed;
+          const angle = electronAngles[ai][oi][ei];
+          const ex = orbit.a * Math.cos(angle);
+          const ey = orbit.b * Math.sin(angle);
+          const px = cx + ex * Math.cos(orbit.tilt) - ey * Math.sin(orbit.tilt);
+          const py = cy + ex * Math.sin(orbit.tilt) + ey * Math.cos(orbit.tilt);
+          electronTrails[ai][oi][ei].unshift({ x: px, y: py });
+          if (electronTrails[ai][oi][ei].length > TRAIL_STEPS) {
+            electronTrails[ai][oi][ei].length = TRAIL_STEPS;
+          }
+        }
+      });
+    });
+  }
+
   function drawStars(phase: number) {
     const PW = cvsL.width / DPR;
     const PH = cvsL.height / DPR;
@@ -249,13 +318,108 @@
     });
   }
 
-  function renderLeft(phase: number, _dt: number) {
+  function drawAtoms(phase: number) {
+    const nAtoms = lerp(0, 6, ease(clamp((phase - 0.30) / 0.55, 0, 1)));
+    if (nAtoms < 0.01) return;
+
+    const accent = paletteLeft(phase);
+    const PW = cvsL.width / DPR;
+    const PH = cvsL.height / DPR;
+
+    const alphaHex = (v: number) => Math.round(clamp(v, 0, 1) * 255).toString(16).padStart(2, '0');
+
+    ATOM_DEFS.forEach((atom, ai) => {
+      const atomAlpha = clamp(nAtoms - ai, 0, 1);
+      if (atomAlpha < 0.01) return;
+
+      const cx = atom.rx * PW;
+      const cy = atom.ry * PH;
+      const pulse = 1 + 0.15 * Math.sin(T * 1.5 + atom.protons * 0.4);
+
+      // Nucleus glow
+      const grd = ctxL.createRadialGradient(cx, cy, 0, cx, cy, atom.nucleusR * 2.6 * pulse);
+      grd.addColorStop(0, accent + alphaHex(atomAlpha * 0.27));
+      grd.addColorStop(1, accent + '00');
+      ctxL.beginPath();
+      ctxL.arc(cx, cy, atom.nucleusR * 2.6 * pulse, 0, Math.PI * 2);
+      ctxL.fillStyle = grd;
+      ctxL.fill();
+
+      // Nucleons
+      const total = Math.min(atom.protons + atom.neutrons, 14);
+      ctxL.globalAlpha = atomAlpha;
+      for (let i = 0; i < total; i++) {
+        const a = (i / total) * Math.PI * 2 + T * 0.15;
+        const ring = Math.floor(i / 6);
+        const nr = (ring + 1) * (atom.nucleusR * 0.45);
+        ctxL.beginPath();
+        ctxL.arc(cx + Math.cos(a) * nr, cy + Math.sin(a) * nr, 1.5, 0, Math.PI * 2);
+        ctxL.fillStyle = i < atom.protons ? '#ff8844' : '#5588aa';
+        ctxL.fill();
+      }
+
+      // Core
+      ctxL.beginPath();
+      ctxL.arc(cx, cy, atom.nucleusR * 0.5, 0, Math.PI * 2);
+      ctxL.fillStyle = accent;
+      ctxL.fill();
+      ctxL.globalAlpha = 1;
+
+      // Orbits + electrons
+      atom.orbits.forEach((orbit, oi) => {
+        // Orbit ellipse
+        ctxL.save();
+        ctxL.translate(cx, cy);
+        ctxL.rotate(orbit.tilt);
+        ctxL.beginPath();
+        ctxL.ellipse(0, 0, orbit.a, orbit.b, 0, 0, Math.PI * 2);
+        ctxL.strokeStyle = accent + alphaHex(atomAlpha * 0.16);
+        ctxL.lineWidth = 0.5;
+        ctxL.stroke();
+        ctxL.restore();
+
+        // Electrons
+        for (let ei = 0; ei < orbit.eCount; ei++) {
+          const trail = electronTrails[ai][oi][ei];
+          if (trail.length < 2) continue;
+
+          // Outer trail
+          ctxL.beginPath();
+          ctxL.moveTo(trail[0].x, trail[0].y);
+          for (let t = 1; t < trail.length; t++) ctxL.lineTo(trail[t].x, trail[t].y);
+          ctxL.strokeStyle = accent + alphaHex(atomAlpha * 0.33);
+          ctxL.lineWidth = 1.4 + oi * 0.2;
+          ctxL.stroke();
+
+          // Inner bright trail
+          const innerLen = Math.max(2, Math.floor(trail.length * 0.35));
+          ctxL.beginPath();
+          ctxL.moveTo(trail[0].x, trail[0].y);
+          for (let t = 1; t < innerLen; t++) ctxL.lineTo(trail[t].x, trail[t].y);
+          ctxL.strokeStyle = accent + alphaHex(atomAlpha * 0.6);
+          ctxL.lineWidth = 0.55;
+          ctxL.stroke();
+
+          // Electron dot
+          ctxL.beginPath();
+          ctxL.arc(trail[0].x, trail[0].y, 2.1 + oi * 0.25, 0, Math.PI * 2);
+          ctxL.fillStyle = accent;
+          ctxL.globalAlpha = atomAlpha;
+          ctxL.fill();
+          ctxL.globalAlpha = 1;
+        }
+      });
+    });
+  }
+
+  function renderLeft(phase: number, dt: number) {
     ctxL.clearRect(0, 0, cvsL.width, cvsL.height);
     ctxL.fillStyle = 'rgba(3, 5, 13, 0.92)';
     ctxL.fillRect(0, 0, cvsL.width, cvsL.height);
 
     drawStars(phase);
     drawProtoAtoms(phase);
+    drawAtoms(phase);
   }
 
   function renderRight(_phase: number) {
@@ -274,6 +438,7 @@
     targetPhase = scrollToPhysics(scrollRaw);
     currentPhase += (targetPhase - currentPhase) * Math.min(1, dt * 4);
 
+    updateElectrons(dt);
     renderLeft(currentPhase, dt);
     renderRight(currentPhase);
 
