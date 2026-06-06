@@ -1,0 +1,72 @@
+---
+---
+<div class="panel panel-left" id="panelL">
+  <canvas id="cvsL"></canvas>
+</div>
+<div class="panel panel-right" id="panelR">
+  <canvas id="cvsR"></canvas>
+</div>
+
+<style>
+  .panel {
+    position: fixed;
+    top: 0;
+    width: 80px;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 50;
+    overflow: hidden;
+    background: #03050d;
+  }
+  .panel-left {
+    left: 0;
+    border-right: 0.5px solid #0d1a2a;
+  }
+  .panel-right {
+    right: 0;
+    border-left: 0.5px solid #0d1a2a;
+  }
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  @media (max-width: 1100px) {
+    .panel { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .panel { display: none; }
+  }
+</style>
+
+<script>
+  const panelL = document.getElementById('panelL') as HTMLDivElement;
+  const panelR = document.getElementById('panelR') as HTMLDivElement;
+  const cvsL = document.getElementById('cvsL') as HTMLCanvasElement;
+  const cvsR = document.getElementById('cvsR') as HTMLCanvasElement;
+  const ctxL = cvsL.getContext('2d')!;
+  const ctxR = cvsR.getContext('2d')!;
+
+  function resizePanels() {
+    const PW = panelL.offsetWidth;
+    const PH = window.innerHeight;
+    [cvsL, cvsR].forEach(cvs => {
+      cvs.width = PW;
+      cvs.height = PH;
+    });
+  }
+
+  function debounce(fn: () => void, ms: number) {
+    let id: ReturnType<typeof setTimeout>;
+    return () => { clearTimeout(id); id = setTimeout(fn, ms); };
+  }
+
+  window.addEventListener('resize', debounce(resizePanels, 200));
+  resizePanels();
+
+  // Temporary: paint solid color to verify panels are active
+  ctxL.fillStyle = '#0a1020';
+  ctxL.fillRect(0, 0, cvsL.width, cvsL.height);
+  ctxR.fillStyle = '#0a1020';
+  ctxR.fillRect(0, 0, cvsR.width, cvsR.height);
+</script>
