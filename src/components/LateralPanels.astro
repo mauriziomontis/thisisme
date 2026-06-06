@@ -17,14 +17,23 @@
     z-index: 50;
     overflow: hidden;
     background: #03050d;
+    opacity: 0;
+    transition: opacity 0.8s ease;
   }
   .panel-left {
     left: 0;
     border-right: 0.5px solid #0d1a2a;
+    mask-image: linear-gradient(to bottom, transparent 0%, black 6%, black 94%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 6%, black 94%, transparent 100%);
   }
   .panel-right {
     right: 0;
     border-left: 0.5px solid #0d1a2a;
+    mask-image: linear-gradient(to bottom, transparent 0%, black 6%, black 94%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 6%, black 94%, transparent 100%);
+  }
+  .panel.ready {
+    opacity: 0.85;
   }
   canvas {
     display: block;
@@ -709,5 +718,10 @@
   requestAnimationFrame(() => {
     resizePanels();
     requestAnimationFrame(frame);
+    // Fade in after first frame
+    requestAnimationFrame(() => {
+      panelL.classList.add('ready');
+      panelR.classList.add('ready');
+    });
   });
 </script>
