@@ -484,6 +484,65 @@
 
   const bondParticleT: number[] = BONDS.map((_, i) => i * 0.2);
 
+  // ── PCB right panel ───────────────────────────────────────────
+  interface TracePoint { rx: number; ry: number; }
+
+  const PCB_TRACES: TracePoint[][] = [
+    [{ rx: 0.30, ry: 0.02 }, { rx: 0.30, ry: 0.18 }, { rx: 0.15, ry: 0.18 },
+     { rx: 0.15, ry: 0.35 }, { rx: 0.30, ry: 0.35 }, { rx: 0.30, ry: 0.52 },
+     { rx: 0.15, ry: 0.52 }, { rx: 0.15, ry: 0.68 }, { rx: 0.30, ry: 0.68 },
+     { rx: 0.30, ry: 0.98 }],
+    [{ rx: 0.70, ry: 0.02 }, { rx: 0.70, ry: 0.22 }, { rx: 0.85, ry: 0.22 },
+     { rx: 0.85, ry: 0.45 }, { rx: 0.70, ry: 0.45 }, { rx: 0.70, ry: 0.60 },
+     { rx: 0.85, ry: 0.60 }, { rx: 0.85, ry: 0.78 }, { rx: 0.70, ry: 0.78 },
+     { rx: 0.70, ry: 0.98 }],
+    [{ rx: 0.50, ry: 0.05 }, { rx: 0.50, ry: 0.28 }, { rx: 0.65, ry: 0.28 },
+     { rx: 0.65, ry: 0.50 }, { rx: 0.35, ry: 0.50 }, { rx: 0.35, ry: 0.72 },
+     { rx: 0.50, ry: 0.72 }, { rx: 0.50, ry: 0.95 }],
+    [{ rx: 0.08, ry: 0.08 }, { rx: 0.92, ry: 0.08 }, { rx: 0.92, ry: 0.40 },
+     { rx: 0.08, ry: 0.40 }, { rx: 0.08, ry: 0.60 }, { rx: 0.92, ry: 0.60 },
+     { rx: 0.92, ry: 0.92 }, { rx: 0.08, ry: 0.92 }],
+  ];
+
+  const PCB_VIAS: { rx: number; ry: number }[] = [
+    { rx: 0.30, ry: 0.18 }, { rx: 0.30, ry: 0.35 }, { rx: 0.30, ry: 0.52 },
+    { rx: 0.70, ry: 0.22 }, { rx: 0.70, ry: 0.45 }, { rx: 0.70, ry: 0.60 },
+    { rx: 0.50, ry: 0.28 }, { rx: 0.50, ry: 0.72 }, { rx: 0.65, ry: 0.50 },
+    { rx: 0.35, ry: 0.50 }, { rx: 0.92, ry: 0.40 }, { rx: 0.08, ry: 0.60 },
+  ];
+
+  const signalOffsets: number[] = PCB_TRACES.map((_, i) => i * 0.25);
+  const TRACE_VARIATIONS = [1.0, 0.85, 1.15, 0.70];
+
+  function getTraceLength(trace: TracePoint[], PW: number, PH: number): number {
+    let len = 0;
+    for (let i = 1; i < trace.length; i++) {
+      const dx = (trace[i].rx - trace[i-1].rx) * PW;
+      const dy = (trace[i].ry - trace[i-1].ry) * PH;
+      len += Math.sqrt(dx * dx + dy * dy);
+    }
+    return len;
+  }
+
+  function getPosAlongTrace(trace: TracePoint[], t: number, PW: number, PH: number): { x: number; y: number } {
+    const totalLen = getTraceLength(trace, PW, PH);
+    let target = t * totalLen;
+    for (let i = 1; i < trace.length; i++) {
+      const dx = (trace[i].rx - trace[i-1].rx) * PW;
+      const dy = (trace[i].ry - trace[i-1].ry) * PH;
+      const segLen = Math.sqrt(dx * dx + dy * dy);
+      if (target <= segLen) {
+        const frac = segLen > 0 ? target / segLen : 0;
+        return {
+          x: (trace[i-1].rx + (trace[i].rx - trace[i-1].rx) * frac) * PW,
+          y: (trace[i-1].ry + (trace[i].ry - trace[i-1].ry) * frac) * PH,
+        };
+      }
+      target -= segLen;
+    }
+    return { x: trace[trace.length - 1].rx * PW, y: trace[trace.length - 1].ry * PH };
+  }
+
   function drawBonds(phase: number) {
     const bondAlpha = ease(clamp((phase - 0.70) / 0.22, 0, 1));
     if (bondAlpha < 0.01) return;
@@ -545,10 +604,89 @@
     drawBonds(phase);
   }
 
-  function renderRight(_phase: number) {
+  function renderRight(phase: number) {
+    const PW = cvsR.width / DPR;
+    const PH = cvsR.height / DPR;
+    const accent = paletteRight(phase);
+    const alphaHex = (v: number) => Math.round(clamp(v, 0, 1) * 255).toString(16).padStart(2, '0');
+
     ctxR.clearRect(0, 0, cvsR.width, cvsR.height);
     ctxR.fillStyle = 'rgba(3, 8, 5, 0.97)';
     ctxR.fillRect(0, 0, cvsR.width, cvsR.height);
+
+    // Grid
+    ctxR.strokeStyle = '#091508';
+    ctxR.lineWidth = 0.25;
+    for (let x = 0; x < PW; x += 10) {
+      ctxR.beginPath(); ctxR.moveTo(x, 0); ctxR.lineTo(x, PH); ctxR.stroke();
+    }
+    for (let y = 0; y < PH; y += 10) {
+      ctxR.beginPath(); ctxR.moveTo(0, y); ctxR.lineTo(PW, y); ctxR.stroke();
+    }
+
+    // Traces
+    ctxR.lineWidth = 1;
+    PCB_TRACES.forEach(trace => {
+      ctxR.beginPath();
+      ctxR.moveTo(trace[0].rx * PW, trace[0].ry * PH);
+      for (let i = 1; i < trace.length; i++) {
+        ctxR.lineTo(trace[i].rx * PW, trace[i].ry * PH);
+      }
+      ctxR.strokeStyle = accent + alphaHex(0.6);
+      ctxR.stroke();
+    });
+
+    // Vias
+    PCB_VIAS.forEach(via => {
+      ctxR.beginPath();
+      ctxR.arc(via.rx * PW, via.ry * PH, 2.8, 0, Math.PI * 2);
+      ctxR.strokeStyle = accent;
+      ctxR.lineWidth = 1;
+      ctxR.stroke();
+      ctxR.beginPath();
+      ctxR.arc(via.rx * PW, via.ry * PH, 1, 0, Math.PI * 2);
+      ctxR.fillStyle = accent + 'aa';
+      ctxR.fill();
+    });
+
+    // IC component
+    const icX = PW * 0.20, icY = PH * 0.42, icW = PW * 0.60, icH = PH * 0.10;
+    ctxR.strokeStyle = accent + 'aa';
+    ctxR.lineWidth = 1;
+    ctxR.strokeRect(icX, icY, icW, icH);
+    ctxR.fillStyle = accent + '55';
+    ctxR.font = `${Math.max(6, Math.floor(PW * 0.08))}px monospace`;
+    ctxR.fillText('ATmega', icX + icW * 0.15, icY + icH * 0.65);
+
+    // Capacitors
+    const capW = PW * 0.08, capH = PH * 0.04;
+    [[0.05, 0.20], [0.05, 0.75]].forEach(([crx, cry]) => {
+      ctxR.strokeStyle = accent + '88';
+      ctxR.lineWidth = 0.8;
+      ctxR.strokeRect(crx * PW - capW / 2, cry * PH - capH / 2, capW, capH);
+    });
+
+    // Signal dots
+    const speed = 1 + currentPhase * 2.5;
+    PCB_TRACES.forEach((trace, ti) => {
+      signalOffsets[ti] = (signalOffsets[ti] + 0.00007 * speed * TRACE_VARIATIONS[ti]) % 1;
+      const pos = getPosAlongTrace(trace, signalOffsets[ti], PW, PH);
+
+      ctxR.beginPath();
+      ctxR.arc(pos.x, pos.y, 5, 0, Math.PI * 2);
+      ctxR.fillStyle = accent + '38';
+      ctxR.fill();
+
+      ctxR.beginPath();
+      ctxR.arc(pos.x, pos.y, 2.2, 0, Math.PI * 2);
+      ctxR.fillStyle = accent;
+      ctxR.fill();
+
+      ctxR.beginPath();
+      ctxR.arc(pos.x, pos.y, 0.8, 0, Math.PI * 2);
+      ctxR.fillStyle = '#ffffff';
+      ctxR.fill();
+    });
   }
 
   function frame(timestamp: number) {
