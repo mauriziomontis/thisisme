@@ -202,6 +202,28 @@
     atom.orbits.map(orbit => Array.from({ length: orbit.eCount }, () => []))
   );
 
+  // ── Quantum jumps ─────────────────────────────────────────────
+  interface JumpState {
+    timer: number;
+    threshold: number;
+    jumping: boolean;
+    jumpT: number;
+    sparks: { angle: number; speed: number }[];
+  }
+
+  const jumpStates: JumpState[][] = ATOM_DEFS.map(atom =>
+    atom.orbits.map(() => ({
+      timer: 0,
+      threshold: 6 + Math.random() * 14,
+      jumping: false,
+      jumpT: 0,
+      sparks: Array.from({ length: 5 }, () => ({
+        angle: Math.random() * Math.PI * 2,
+        speed: 20 + Math.random() * 30,
+      })),
+    }))
+  );
+
   function updateElectrons(dt: number) {
     const PW = cvsL.width / DPR;
     const PH = cvsL.height / DPR;
@@ -221,6 +243,24 @@
           electronTrails[ai][oi][ei].unshift({ x: px, y: py });
           if (electronTrails[ai][oi][ei].length > TRAIL_STEPS) {
             electronTrails[ai][oi][ei].length = TRAIL_STEPS;
+          }
+        }
+      });
+
+      // Quantum jump timers
+      atom.orbits.forEach((_orbit, oi) => {
+        if (atom.orbits.length < 2) return;
+        const js = jumpStates[ai][oi];
+        if (js.jumping) {
+          js.jumpT += dt * 2;
+          if (js.jumpT >= 1) { js.jumping = false; js.jumpT = 0; }
+        } else {
+          js.timer += dt;
+          if (js.timer > js.threshold) {
+            js.timer = 0;
+            js.threshold = 6 + Math.random() * 14;
+            js.jumping = true;
+            js.jumpT = 0;
           }
         }
       });
@@ -408,7 +448,89 @@
           ctxL.fill();
           ctxL.globalAlpha = 1;
         }
+
+        // Quantum jump flash
+        if (atom.orbits.length > 1) {
+          const js = jumpStates[ai][oi];
+          if (js.jumping && js.jumpT < 1) {
+            const flashAlpha = atomAlpha * (1 - js.jumpT) * 0.8;
+            const head = electronTrails[ai][oi][0] ?? { x: cx, y: cy };
+            js.sparks.forEach(spark => {
+              const dist = js.jumpT * spark.speed;
+              const sx = head.x + Math.cos(spark.angle) * dist;
+              const sy = head.y + Math.sin(spark.angle) * dist;
+              ctxL.beginPath();
+              ctxL.arc(sx, sy, 1.2, 0, Math.PI * 2);
+              ctxL.fillStyle = '#ffffff';
+              ctxL.globalAlpha = flashAlpha * (1 - js.jumpT);
+              ctxL.fill();
+            });
+            ctxL.beginPath();
+            ctxL.arc(head.x, head.y, 4 * (1 - js.jumpT), 0, Math.PI * 2);
+            ctxL.fillStyle = '#ffffff';
+            ctxL.globalAlpha = flashAlpha;
+            ctxL.fill();
+            ctxL.globalAlpha = 1;
+          }
+        }
       });
+    });
+  }
+
+  // ── Molecular bonds ───────────────────────────────────────────
+  const BONDS: [number, number, number][] = [
+    [0, 2, 1], [1, 3, 2], [2, 3, 1], [3, 4, 2], [4, 5, 1],
+  ];
+
+  const bondParticleT: number[] = BONDS.map((_, i) => i * 0.2);
+
+  function drawBonds(phase: number) {
+    const bondAlpha = ease(clamp((phase - 0.70) / 0.22, 0, 1));
+    if (bondAlpha < 0.01) return;
+
+    const accent = paletteLeft(phase);
+    const PW = cvsL.width / DPR;
+    const PH = cvsL.height / DPR;
+    const alphaHex = (v: number) => Math.round(clamp(v, 0, 1) * 255).toString(16).padStart(2, '0');
+
+    BONDS.forEach(([fromIdx, toIdx, bondOrder], bi) => {
+      const from = ATOM_DEFS[fromIdx];
+      const to = ATOM_DEFS[toIdx];
+      const x1 = from.rx * PW, y1 = from.ry * PH;
+      const x2 = to.rx * PW,   y2 = to.ry * PH;
+      const dx = x2 - x1, dy = y2 - y1;
+      const len = Math.sqrt(dx * dx + dy * dy);
+      const nx = -dy / len, ny = dx / len;
+
+      for (let b = 0; b < bondOrder; b++) {
+        const offset = bondOrder === 1 ? 0 : (b - (bondOrder - 1) / 2) * 3;
+        const ox = nx * offset, oy = ny * offset;
+
+        ctxL.beginPath();
+        ctxL.moveTo(x1 + ox, y1 + oy);
+        ctxL.lineTo(x2 + ox, y2 + oy);
+        ctxL.strokeStyle = accent + alphaHex(bondAlpha * 0.30);
+        ctxL.lineWidth = 3;
+        ctxL.stroke();
+
+        ctxL.beginPath();
+        ctxL.moveTo(x1 + ox, y1 + oy);
+        ctxL.lineTo(x2 + ox, y2 + oy);
+        ctxL.strokeStyle = accent + alphaHex(bondAlpha * 0.70);
+        ctxL.lineWidth = 0.7;
+        ctxL.stroke();
+      }
+
+      bondParticleT[bi] = (bondParticleT[bi] + 0.004) % 1;
+      const pt = bondParticleT[bi];
+      const px = x1 + dx * pt;
+      const py = y1 + dy * pt;
+      ctxL.beginPath();
+      ctxL.arc(px, py, 2, 0, Math.PI * 2);
+      ctxL.fillStyle = accent;
+      ctxL.globalAlpha = bondAlpha;
+      ctxL.fill();
+      ctxL.globalAlpha = 1;
     });
   }
 
@@ -420,6 +542,7 @@
     drawStars(phase);
     drawProtoAtoms(phase);
     drawAtoms(phase);
+    drawBonds(phase);
   }
 
   function renderRight(_phase: number) {
