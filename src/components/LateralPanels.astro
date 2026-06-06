@@ -44,15 +44,24 @@
   const panelR = document.getElementById('panelR') as HTMLDivElement;
   const cvsL = document.getElementById('cvsL') as HTMLCanvasElement;
   const cvsR = document.getElementById('cvsR') as HTMLCanvasElement;
-  const ctxL = cvsL.getContext('2d')!;
-  const ctxR = cvsR.getContext('2d')!;
+  const ctxL = cvsL.getContext('2d');
+  const ctxR = cvsR.getContext('2d');
+
+  if (!ctxL || !ctxR) throw new Error('Canvas 2D context unavailable');
+
+  const DPR = window.devicePixelRatio || 1;
 
   function resizePanels() {
     const PW = panelL.offsetWidth;
     const PH = window.innerHeight;
     [cvsL, cvsR].forEach(cvs => {
-      cvs.width = PW;
-      cvs.height = PH;
+      cvs.width = PW * DPR;
+      cvs.height = PH * DPR;
+      cvs.style.width = PW + 'px';
+      cvs.style.height = PH + 'px';
+    });
+    [ctxL, ctxR].forEach(ctx => {
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
     });
   }
 
@@ -62,11 +71,13 @@
   }
 
   window.addEventListener('resize', debounce(resizePanels, 200));
-  resizePanels();
 
-  // Temporary: paint solid color to verify panels are active
-  ctxL.fillStyle = '#0a1020';
-  ctxL.fillRect(0, 0, cvsL.width, cvsL.height);
-  ctxR.fillStyle = '#0a1020';
-  ctxR.fillRect(0, 0, cvsR.width, cvsR.height);
+  requestAnimationFrame(() => {
+    resizePanels();
+    // Temporary: paint solid color to verify panels are active
+    ctxL.fillStyle = '#0a1020';
+    ctxL.fillRect(0, 0, cvsL.width, cvsL.height);
+    ctxR.fillStyle = '#0a1020';
+    ctxR.fillRect(0, 0, cvsR.width, cvsR.height);
+  });
 </script>
