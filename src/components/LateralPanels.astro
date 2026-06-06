@@ -124,18 +124,83 @@
   let T = 0;
   let lastTime: number | null = null;
 
+  // ── Star field ────────────────────────────────────────────────
+  interface Star {
+    poleIndex: number;
+    dist: number;
+    baseAngle: number;
+    mag: number;
+    size: number;
+    bright: boolean;
+    trailSpeed: number;
+  }
+
+  const stars: Star[] = Array.from({ length: 56 }, (_, i) => ({
+    poleIndex: i < 31 ? 0 : 1,
+    dist: 12 + rng(i * 3.7) * 80,
+    baseAngle: rng(i * 5.1) * Math.PI * 2,
+    mag: rng(i * 7.3),
+    size: rng(i * 7.3) < 0.07 ? 1.9 : rng(i * 7.3) < 0.22 ? 1.1 : 0.6,
+    bright: rng(i * 7.3) < 0.07,
+    trailSpeed: 0.0022 + rng(i * 2.3) * 0.0012,
+  }));
+
+  function drawStars(phase: number) {
+    const PW = cvsL.width / DPR;
+    const PH = cvsL.height / DPR;
+    const poles = [
+      { x: PW * 0.44, y: PH * 0.16 },
+      { x: PW * 0.56, y: PH * 0.52 },
+    ];
+
+    const starAlpha = 1 - ease(clamp((phase - 0.28) / 0.40, 0, 1));
+    if (starAlpha <= 0.01) return;
+
+    const shrinkFactor = 1 - ease(clamp((phase - 0.22) / 0.38, 0, 1));
+    const trailLength = Math.round(lerp(220, 35, phase));
+    const accent = paletteLeft(phase);
+
+    stars.forEach(star => {
+      const pole = poles[star.poleIndex];
+      const angle = star.baseAngle + T * star.trailSpeed;
+
+      const trailPoints: { x: number; y: number }[] = [];
+      for (let t = 0; t < trailLength; t++) {
+        const a = angle - t * 0.0008;
+        trailPoints.push({
+          x: pole.x + Math.cos(a) * star.dist * shrinkFactor,
+          y: pole.y + Math.sin(a) * star.dist * shrinkFactor * 0.55,
+        });
+      }
+
+      if (trailPoints.length < 2) return;
+
+      const alphaHex = (v: number) => Math.round(clamp(v, 0, 1) * 255).toString(16).padStart(2, '0');
+      const trailAlpha = starAlpha * (star.bright ? 0.7 : 0.35);
+
+      ctxL.beginPath();
+      ctxL.moveTo(trailPoints[0].x, trailPoints[0].y);
+      for (let i = 1; i < trailPoints.length; i++) {
+        ctxL.lineTo(trailPoints[i].x, trailPoints[i].y);
+      }
+      ctxL.strokeStyle = accent + alphaHex(trailAlpha);
+      ctxL.lineWidth = star.size * 0.5;
+      ctxL.stroke();
+
+      const head = trailPoints[0];
+      ctxL.beginPath();
+      ctxL.arc(head.x, head.y, star.size, 0, Math.PI * 2);
+      ctxL.fillStyle = accent + alphaHex(starAlpha);
+      ctxL.fill();
+    });
+  }
+
   function renderLeft(phase: number, _dt: number) {
     ctxL.clearRect(0, 0, cvsL.width, cvsL.height);
     ctxL.fillStyle = 'rgba(3, 5, 13, 0.92)';
     ctxL.fillRect(0, 0, cvsL.width, cvsL.height);
-    // Phase indicator line (temporary visual debug)
-    const accent = paletteLeft(phase);
-    ctxL.strokeStyle = accent;
-    ctxL.lineWidth = 1;
-    ctxL.beginPath();
-    ctxL.moveTo(0, cvsL.height / DPR * phase);
-    ctxL.lineTo(cvsL.width / DPR, cvsL.height / DPR * phase);
-    ctxL.stroke();
+
+    drawStars(phase);
   }
 
   function renderRight(_phase: number) {
