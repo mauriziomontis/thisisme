@@ -95,12 +95,73 @@
 
   window.addEventListener('resize', debounce(resizePanels, 200));
 
+  // ── Scroll state ─────────────────────────────────────────────
+  let scrollRaw = 0;
+
+  window.addEventListener('scroll', () => {
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    scrollRaw = maxScroll > 0 ? window.scrollY / maxScroll : 0;
+  }, { passive: true });
+
+  // ── Phase mapping ─────────────────────────────────────────────
+  const N_SECTIONS = 7;
+  const SECTION_PHASES = [0, 0.24, 0.44, 0.58, 0.72, 0.85, 1.0];
+
+  function scrollToPhysics(s: number): number {
+    const idx = Math.min(Math.floor(s * N_SECTIONS), N_SECTIONS - 1);
+    const local = (s * N_SECTIONS) - idx;
+    const from = SECTION_PHASES[idx];
+    const to = SECTION_PHASES[Math.min(idx + 1, N_SECTIONS - 1)];
+    const prev = idx > 0 ? SECTION_PHASES[idx - 1] : from;
+
+    if (local < 0.20) return lerp(prev, from, ease(local / 0.20));
+    if (local > 0.80) return lerp(from, to, ease((local - 0.80) / 0.20));
+    return from;
+  }
+
+  let currentPhase = 0;
+  let targetPhase = 0;
+  let T = 0;
+  let lastTime: number | null = null;
+
+  function renderLeft(phase: number, _dt: number) {
+    ctxL.clearRect(0, 0, cvsL.width, cvsL.height);
+    ctxL.fillStyle = 'rgba(3, 5, 13, 0.92)';
+    ctxL.fillRect(0, 0, cvsL.width, cvsL.height);
+    // Phase indicator line (temporary visual debug)
+    const accent = paletteLeft(phase);
+    ctxL.strokeStyle = accent;
+    ctxL.lineWidth = 1;
+    ctxL.beginPath();
+    ctxL.moveTo(0, cvsL.height / DPR * phase);
+    ctxL.lineTo(cvsL.width / DPR, cvsL.height / DPR * phase);
+    ctxL.stroke();
+  }
+
+  function renderRight(_phase: number) {
+    ctxR.clearRect(0, 0, cvsR.width, cvsR.height);
+    ctxR.fillStyle = 'rgba(3, 8, 5, 0.97)';
+    ctxR.fillRect(0, 0, cvsR.width, cvsR.height);
+  }
+
+  function frame(timestamp: number) {
+    if (panelL.offsetWidth === 0) { requestAnimationFrame(frame); return; }
+    if (!lastTime) lastTime = timestamp;
+    const dt = Math.min((timestamp - lastTime) / 1000, 0.05);
+    lastTime = timestamp;
+    T += dt * 0.35;
+
+    targetPhase = scrollToPhysics(scrollRaw);
+    currentPhase += (targetPhase - currentPhase) * Math.min(1, dt * 4);
+
+    renderLeft(currentPhase, dt);
+    renderRight(currentPhase);
+
+    requestAnimationFrame(frame);
+  }
+
   requestAnimationFrame(() => {
     resizePanels();
-    // Temporary: paint solid color to verify panels are active
-    ctxL.fillStyle = '#0a1020';
-    ctxL.fillRect(0, 0, cvsL.width, cvsL.height);
-    ctxR.fillStyle = '#0a1020';
-    ctxR.fillRect(0, 0, cvsR.width, cvsR.height);
+    requestAnimationFrame(frame);
   });
 </script>
