@@ -70,6 +70,29 @@
     return () => { clearTimeout(id); id = setTimeout(fn, ms); };
   }
 
+  // ── Utilities ────────────────────────────────────────────────
+  const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+  const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
+  const ease = (t: number) => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+  const rng = (s: number) => { const x = Math.sin(s * 127.1 + 31.3) * 43758.5453; return x - Math.floor(x); };
+
+  function lerpHex(a: string, b: string, t: number): string {
+    const f = (s: string, i: number) => parseInt(s.replace('#', '').slice(i * 2, i * 2 + 2), 16);
+    return '#' + [0, 1, 2].map(i =>
+      Math.round(lerp(f(a, i), f(b, i), t)).toString(16).padStart(2, '0')
+    ).join('');
+  }
+
+  function paletteLeft(phase: number): string {
+    if (phase < 0.4) return lerpHex('#aaaaee', '#44aaff', phase / 0.4);
+    if (phase < 0.7) return lerpHex('#44aaff', '#00ffcc', (phase - 0.4) / 0.3);
+    return lerpHex('#00ffcc', '#44ffaa', (phase - 0.7) / 0.3);
+  }
+
+  function paletteRight(phase: number): string {
+    return lerpHex('#00cc55', '#44ffaa', clamp((phase - 0.3) / 0.7, 0, 1));
+  }
+
   window.addEventListener('resize', debounce(resizePanels, 200));
 
   requestAnimationFrame(() => {
